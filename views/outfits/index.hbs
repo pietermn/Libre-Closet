@@ -1,41 +1,123 @@
 {{>navbar}}
 
-<main class="p-4 pt-20 pb-24">
-  <div class="flex items-center justify-between mb-6 px-2">
-    <h1 class="text-2xl font-bold">{{t 'lang.OUTFITS'}}</h1>
-    <a href="/outfits/new" class="btn btn-primary btn-sm"
-      >+ {{t 'lang.BUILD_OUTFIT'}}</a
-    >
-  </div>
+<main class="mx-auto max-w-6xl px-4 pb-28 pt-20 sm:px-6">
+  <section class="mb-8">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p
+          class="mb-1 text-xs font-semibold tracking-wider text-primary uppercase"
+        >
+          {{outfits.length}} {{t 'lang.RESULTS'}}
+        </p>
+        <h1 class="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+          {{t 'lang.OUTFITS'}}
+        </h1>
+      </div>
+      <a
+        href="/outfits/new"
+        class="btn btn-primary btn-sm shrink-0 gap-2 shadow-sm transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          class="size-4"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span class="hidden sm:inline">{{t 'lang.BUILD_OUTFIT'}}</span>
+        <span class="sm:hidden">Build</span>
+      </a>
+    </div>
+  </section>
 
   {{#if outfits.length}}
-  <div class="flex flex-wrap gap-4 justify-center">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
     {{#each outfits}}
-    <div
-      class="card bg-base-100 w-96 shadow-sm hover:shadow-md transition-shadow"
+    <article
+      class="card overflow-visible border border-base-content/8 bg-base-100 shadow-sm transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none"
     >
-      <div class="card-body p-3 cursor-pointer" onclick="window.location = '/outfits/{{this.id}}'">
-        <div class="flex items-center justify-between gap-2">
-          <a href="/outfits/{{this.id}}" class="card-title text-sm hover:underline truncate">{{this.name}}</a>
-          <div class="dropdown dropdown-end shrink-0" onclick="event.stopPropagation();">
-            <label tabindex="0" class="btn btn-ghost btn-xs btn-square" title="{{t 'lang.ADD_TO_CALENDAR'}}">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+      <a
+        href="/outfits/{{this.id}}"
+        class="group grid min-h-56 grid-flow-col auto-cols-fr items-end gap-2 overflow-hidden rounded-t-box bg-base-200 p-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >
+        {{#each this.garments}}
+        <div
+          class="flex h-full min-w-0 items-center justify-center rounded-field bg-base-100/45 p-2 transition-transform duration-200 ease-out group-hover:-translate-y-1 motion-reduce:transition-none"
+        >
+          {{#if this.photo}}
+          <img
+            src="/file/nobg/{{this.photo.fileName}}"
+            alt="{{this.name}}"
+            class="h-full w-full object-contain"
+          />
+          {{else}}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.4"
+            stroke="currentColor"
+            class="size-7 text-base-content/30"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.251 2.251 0 0 1 2.012 1.244l.256.512a2.251 2.251 0 0 0 2.013 1.244h3.218a2.251 2.251 0 0 0 2.013-1.244l.256-.512a2.251 2.251 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3"
+            />
+          </svg>
+          {{/if}}
+        </div>
+        {{/each}}
+      </a>
+
+      <div class="card-body gap-2 p-4">
+        <div class="flex items-start justify-between gap-3">
+          <a
+            href="/outfits/{{this.id}}"
+            class="card-title text-base leading-5 transition-colors duration-150 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >{{this.name}}</a
+          >
+          <details class="dropdown dropdown-end shrink-0">
+            <summary
+              class="btn btn-ghost btn-sm btn-square"
+              title="{{t 'lang.ADD_TO_CALENDAR'}}"
+              aria-label="{{t 'lang.ADD_TO_CALENDAR'}}"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.7"
+                stroke="currentColor"
+                class="size-4"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z"
+                />
               </svg>
-            </label>
-            <div tabindex="0" class="dropdown-content z-10 card card-compact shadow-lg bg-base-100 border border-base-300 w-64 mt-1">
-              <div class="card-body p-4 gap-3">
-                <p class="font-semibold text-sm">{{t 'lang.CALENDAR_ADD_OUTFIT_PROMPT'}}</p>
+            </summary>
+            <div
+              class="dropdown-content z-10 mt-1 w-64 rounded-box border border-base-content/10 bg-base-100 shadow-lg"
+            >
+              <div class="p-4">
+                <p class="mb-3 text-sm font-semibold">
+                  {{t 'lang.CALENDAR_ADD_OUTFIT_PROMPT'}}
+                </p>
                 <form
                   hx-post="/calendar"
                   hx-swap="none"
                   hx-push-url="false"
                   _="on htmx:afterRequest[detail.successful]
                     reset me
-                    call document.activeElement.blur()
-                    for el in <[tabindex]/> in closest .dropdown
-                      call el.blur()
-                    end
+                    remove @open from closest <details/>
                     remove .hidden from #calendar-toast
                     wait 3s
                     add .hidden to #calendar-toast"
@@ -45,84 +127,95 @@
                   <input
                     type="date"
                     name="date"
-                    class="input input-sm input-bordered w-full"
+                    value="{{@root.today}}"
+                    class="input input-sm w-full"
                     required
-                    onblur="this.closest('form').querySelector('[type=submit]').focus()"
+                    onblur="
+                      this.closest('form')
+                        .querySelector('[type=submit]')
+                        .focus()
+                    "
                   />
-                  <button type="submit" class="btn btn-primary btn-sm w-full">{{t 'lang.SAVE'}}</button>
+                  <button type="submit" class="btn btn-primary btn-sm w-full">
+                    {{t 'lang.SAVE'}}
+                  </button>
                 </form>
               </div>
             </div>
-          </div>
+          </details>
         </div>
         {{#if this.notes}}
-        <p class="text-xs text-base-content/60 line-clamp-2">{{this.notes}}</p>
+        <p class="text-sm leading-5 text-base-content/60 line-clamp-2">
+          {{this.notes}}
+        </p>
         {{/if}}
-        <a href="/outfits/{{this.id}}" class="flex flex-wrap gap-1 mt-1">
-          {{#each this.garments}} {{#if this.photo}}
-          <img
-            src="/file/nobg/{{this.photo.fileName}}"
-            alt="{{this.name}}"
-            class="size-20 rounded object-cover"
-          />
-          {{else}}
-          <div
-            class="size-20 rounded bg-base-200 flex items-center justify-center"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="size-5 text-base-content/30"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.251 2.251 0 0 1 2.012 1.244l.256.512a2.251 2.251 0 0 0 2.013 1.244h3.218a2.251 2.251 0 0 0 2.013-1.244l.256-.512a2.251 2.251 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3"
-              />
-            </svg>
-          </div>
-          {{/if}} {{/each}}
-        </a>
+        <p class="text-xs font-medium text-base-content/50">
+          {{this.pieceCount}} pieces
+        </p>
       </div>
-    </div>
+    </article>
     {{/each}}
   </div>
   {{else}}
-  <div
-    class="flex flex-col items-center justify-center gap-4 pt-20 text-base-content/40"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1"
-      stroke="currentColor"
-      class="size-16"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
-      />
-    </svg>
-    <p>{{t 'lang.NO_OUTFITS'}}</p>
-    <a href="/outfits/new" class="btn btn-primary btn-sm"
-      >{{t 'lang.ADD_FIRST_OUTFIT'}}</a
-    >
+  <div class="card border border-dashed border-base-content/15 bg-base-200/35">
+    <div class="card-body items-center py-16 text-center text-base-content/50">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.2"
+        stroke="currentColor"
+        class="size-16"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
+        />
+      </svg>
+      <p class="max-w-sm text-sm">{{t 'lang.NO_OUTFITS'}}</p>
+      <a href="/outfits/new" class="btn btn-primary btn-sm"
+        >{{t 'lang.ADD_FIRST_OUTFIT'}}</a
+      >
+    </div>
   </div>
   {{/if}}
 </main>
 
-<div id="calendar-toast" class="toast toast-top toast-center hidden z-20 top-20" aria-live="polite">
+<div
+  id="calendar-toast"
+  class="toast toast-top toast-center top-20 z-20 hidden"
+  aria-live="polite"
+>
   <div class="alert alert-success shadow-md">
-    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="size-5 shrink-0"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9 12l2 2 4-4m6 2a9.0 9.0 0 1 1-18 0 9.0 9.0 0 0 1 18 0z"
+      />
     </svg>
     <span>{{t 'lang.CALENDAR_OUTFIT_ADDED'}}</span>
   </div>
 </div>
+
+<script>
+  document.addEventListener('pointerdown', function (event) {
+    document
+      .querySelectorAll('details.dropdown[open]')
+      .forEach(function (menu) {
+        if (!menu.contains(event.target)) menu.removeAttribute('open');
+      });
+  });
+</script>
 
 {{>dock}}

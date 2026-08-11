@@ -21,6 +21,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { ErrorViewFilter } from './error-view.filter';
 import { ViewContextModule } from './view-context/view-context.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -154,6 +155,8 @@ import { ViewContextModule } from './view-context/view-context.module';
           then: Joi.string().default('us-east-1'),
           otherwise: Joi.optional(),
         }),
+        OPENAI_API_KEY: Joi.string().optional(),
+        OPENAI_MODEL: Joi.string().default('gpt-5.6-luna'),
       }),
       validationOptions: {
         abortEarly: true,
@@ -186,6 +189,7 @@ import { ViewContextModule } from './view-context/view-context.module';
     WardrobeModule,
     WardrobeShareModule,
     ViewContextModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [

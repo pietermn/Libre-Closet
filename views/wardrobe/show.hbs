@@ -1,10 +1,15 @@
 {{>navbar}}
 
-<main class="p-4 pt-20 pb-24 max-w-lg mx-auto">
-  <div class="flex items-center gap-3 mb-6">
+<main class="p-4 pt-20 pb-24 max-w-xl mx-auto">
+  <header class="flex items-center gap-2 mb-5">
     <a
       href="/wardrobe{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
       class="btn btn-ghost btn-sm btn-circle"
+      aria-label="Back to wardrobe"
+      onclick="
+        window.history.back();
+        return false;
+      "
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -21,24 +26,134 @@
         />
       </svg>
     </a>
-    <h1 class="text-2xl font-bold flex-1">{{garment.name}}</h1>
-  </div>
+    <div class="min-w-0 flex-1">
+      <p
+        class="text-xs font-medium uppercase tracking-wider text-base-content/50"
+      >
+        Garment
+      </p>
+      <h1 class="truncate text-balance text-2xl font-bold">{{garment.name}}</h1>
+    </div>
+    {{#if canEdit}}
+    <div class="tooltip tooltip-bottom shrink-0" data-tip="Edit garment">
+      <a
+        href="/wardrobe/{{garment.id}}/edit{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
+        class="btn btn-ghost btn-square btn-sm shrink-0"
+        aria-label="Edit garment"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.8"
+          stroke="currentColor"
+          class="size-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"
+          />
+        </svg>
+      </a>
+    </div>
+    {{/if}} {{#if canEdit}}
+    <div class="tooltip tooltip-bottom shrink-0" data-tip="Share garment">
+      <button
+        type="button"
+        class="btn btn-ghost btn-sm btn-circle"
+        aria-label="Share garment"
+        onclick="navigator.clipboard.writeText('{{siteUrl}}/share?shareableId={{garment.shareableId}}&type=garment'); alert('{{t 'lang.COPIED'}}')"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.8"
+          stroke="currentColor"
+          class="size-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.935-2.185 2.25 2.25 0 0 0-3.935 2.185Z"
+          />
+        </svg>
+      </button>
+    </div>
+    {{/if}} {{#if canEdit}}
+    <details class="dropdown dropdown-end shrink-0">
+      <summary
+        class="btn btn-ghost btn-square btn-sm shrink-0 list-none"
+        aria-label="More garment actions"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+          class="size-5"
+        >
+          <path
+            d="M12 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"
+          />
+        </svg>
+      </summary>
+      <ul
+        class="menu dropdown-content z-30 mt-2 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
+      >
+        {{#if canClone}}
+        <li>
+          <a
+            href="/wardrobe/{{garment.id}}/clone{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
+            >{{t 'lang.CLONE_GARMENT'}}</a
+          >
+        </li>
+        {{/if}} {{#if canDelete}}
+        <li>
+          <button
+            hx-post="/wardrobe/{{garment.id}}/archive"
+            hx-confirm="{{#if garment.archived}}{{t 'lang.CONFIRM_UNARCHIVE'}}{{else}}{{t 'lang.CONFIRM_ARCHIVE'}}{{/if}}"
+            hx-indicator="#loading"
+          >
+            {{#if garment.archived}}{{t 'lang.UNARCHIVE'}}{{else}}{{t
+            'lang.ARCHIVE'}}{{/if}}
+          </button>
+        </li>
+        <li>
+          <button
+            class="text-error"
+            hx-delete="/wardrobe/{{garment.id}}"
+            hx-confirm="{{t 'lang.CONFIRM_DELETE'}}"
+            hx-indicator="#loading"
+          >
+            {{t 'lang.DELETE'}}
+          </button>
+        </li>
+        {{/if}}
+      </ul>
+    </details>
+    {{/if}}
+  </header>
 
   {{#if garment.photo}}
   <figure
-    class="relative rounded-box overflow-hidden mb-6 bg-base-200 aspect-square w-full max-w-sm mx-auto"
+    class="relative mb-5 aspect-square w-full max-w-md mx-auto overflow-hidden rounded-box border border-base-300 bg-base-200 p-3 shadow-sm"
   >
     <img
       src="/file/nobg/{{garment.photo.fileName}}"
       alt="{{garment.name}}"
-      class="object-cover w-full h-full"
+      class="h-full w-full object-contain"
+      width="1024"
+      height="1024"
+      fetchpriority="high"
     />
     {{!-- Edit mask icon button--}}
     <button
       id="editMaskBtn"
       type="button"
-      class="btn btn-circle btn-sm absolute top-2 right-2 btn-neutral opacity-80 hover:opacity-100"
+      class="btn btn-circle btn-sm absolute top-5 right-5 btn-neutral shadow-sm"
       title="Edit mask"
+      aria-label="Edit photo mask"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -58,183 +173,298 @@
   </figure>
   {{else}}
   <div
-    class="rounded-box bg-base-200 aspect-square w-full max-w-sm mx-auto flex items-center justify-center text-base-content/30 mb-6"
+    class="card card-border mb-5 aspect-square w-full max-w-md mx-auto bg-base-200"
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1"
-      stroke="currentColor"
-      class="size-20"
+    <div
+      class="card-body flex items-center justify-center text-base-content/30"
     >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.251 2.251 0 0 1 2.012 1.244l.256.512a2.251 2.251 0 0 0 2.013 1.244h3.218a2.251 2.251 0 0 0 2.013-1.244l.256-.512a2.251 2.251 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3"
-      />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1"
+        stroke="currentColor"
+        class="size-20"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.251 2.251 0 0 1 2.012 1.244l.256.512a2.251 2.251 0 0 0 2.013 1.244h3.218a2.251 2.251 0 0 0 2.013-1.244l.256-.512a2.251 2.251 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3"
+        />
+      </svg>
+    </div>
   </div>
   {{/if}} {{#if canEdit}} {{!-- Photo upload --}}
-  <form
-    hx-post="/wardrobe/{{garment.id}}/photo{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
-    hx-encoding="multipart/form-data"
-    hx-indicator="#loading"
-    hx-target="main"
-    hx-select="main"
-    hx-swap="outerHTML"
-    class="flex flex-col gap-2 mb-6"
+  <details
+    class="collapse collapse-arrow mb-5 border border-base-300 bg-base-100"
   >
-    <input
-      type="file"
-      id="nobgPhotoInput"
-      name="nobgPhoto"
-      class="hidden"
-      accept="image/webp"
-    />
-    <div class="flex gap-2 items-center">
-      <input
-        type="file"
-        id="photoInput"
-        name="photo"
-        class="file-input file-input-sm flex-1"
-        accept="image/jpeg,image/png,image/gif,image/webp"
-      />
-      <button id="photoBtn" class="btn btn-neutral btn-sm" disabled>
-        {{#if garment.photo}}{{t 'lang.UPDATE_PHOTO'}}{{else}}{{t
-        'lang.ADD_PHOTO'}}{{/if}}
-      </button>
-      <span
-        id="loading"
-        class="htmx-indicator loading loading-ring loading-sm"
-      ></span>
-    </div>
-    <label class="flex items-center gap-2 cursor-pointer select-none">
-      <input
-        type="checkbox"
-        id="bgRemovalToggle"
-        class="toggle toggle-sm"
-        checked
-      />
-      <span class="text-sm">{{t 'lang.BG_REMOVAL_TOGGLE'}}</span>
-    </label>
-    <div
-      id="bgStatus"
-      class="hidden flex flex-col gap-1 text-sm text-base-content/60"
-      data-text-default="{{t 'lang.REMOVING_BACKGROUND'}}"
-      data-text-downloading="{{t 'lang.BG_STAGE_DOWNLOADING'}}"
-      data-text-decoding="{{t 'lang.BG_STAGE_DECODING'}}"
-      data-text-inference="{{t 'lang.BG_STAGE_INFERENCE'}}"
-      data-text-mask="{{t 'lang.BG_STAGE_MASK'}}"
-      data-text-encoding="{{t 'lang.BG_STAGE_ENCODING'}}"
-      data-text-hint-typical="{{t 'lang.BG_HINT_TYPICAL_DURATION'}}"
-      data-text-hint-slow="{{t 'lang.BG_HINT_STILL_WORKING'}}"
-    >
-      <div class="flex items-center gap-2">
-        <span class="loading loading-spinner loading-xs"></span>
-        <span id="bgStatusText">{{t 'lang.REMOVING_BACKGROUND'}}</span>
-      </div>
-      <span id="bgStatusHint" class="text-xs opacity-80"
-        >{{t 'lang.BG_HINT_TYPICAL_DURATION'}}</span
+    <summary class="collapse-title min-h-0 py-4 text-sm font-semibold">
+      Photo &amp; cleanup
+    </summary>
+    <div class="collapse-content">
+      <form
+        id="photoUploadForm"
+        hx-post="/wardrobe/{{garment.id}}/photo{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
+        hx-encoding="multipart/form-data"
+        hx-indicator="#photoSavingSpinner"
+        hx-target="main"
+        hx-select="main"
+        hx-swap="outerHTML"
+        class="flex flex-col gap-4 pt-1"
       >
+        <input
+          type="file"
+          id="nobgPhotoInput"
+          name="nobgPhoto"
+          class="hidden"
+          accept="image/webp"
+        />
+        <fieldset class="fieldset gap-2">
+          <legend class="fieldset-legend">Choose a new photo</legend>
+          <input
+            type="file"
+            id="photoInput"
+            name="photo"
+            class="file-input file-input-sm w-full"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            aria-label="Choose a replacement garment photo"
+          />
+          <p class="label">Use a clear, well-lit image for the best result.</p>
+        </fieldset>
+        <div id="photoEditingActions" class="hidden grid grid-cols-2 gap-2">
+          <button
+            id="editNewPhoto"
+            type="button"
+            class="btn btn-outline btn-sm w-full text-xs"
+          >
+            <span
+              class="loading loading-spinner loading-xs hidden"
+              aria-hidden="true"
+            ></span>
+            <span class="button-label">Remove &amp; refine background</span>
+          </button>
+          <button
+            id="frameNewPhoto"
+            type="button"
+            class="btn btn-outline btn-sm w-full"
+          >
+            Adjust framing
+          </button>
+        </div>
+        <p
+          id="photoEditStatus"
+          class="hidden text-sm text-base-content/65"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <div
+          id="photoPreview"
+          class="hidden card card-side card-border overflow-hidden bg-base-200"
+        >
+          <figure class="w-24 shrink-0 bg-base-100 p-2">
+            <img
+              id="photoPreviewImage"
+              class="aspect-square h-full w-full object-contain"
+              alt="{{garment.name}}"
+            />
+          </figure>
+          <div class="card-body min-w-0 gap-1 p-3">
+            <p class="text-sm font-semibold">New photo selected</p>
+            <p class="text-sm text-base-content/60">
+              Review the result, then update this garment.
+            </p>
+          </div>
+        </div>
+        <div
+          id="photoUploadStatus"
+          class="hidden flex items-center gap-2 text-sm text-base-content/65"
+          role="status"
+          aria-live="polite"
+          data-ready-text="{{t 'lang.PHOTO_READY_TO_SAVE'}}"
+          data-saving-text="{{t 'lang.PHOTO_SAVING'}}"
+          data-saved-text="{{t 'lang.PHOTO_SAVED'}}"
+          data-failed-text="{{t 'lang.PHOTO_UPLOAD_FAILED'}}"
+        >
+          <span
+            id="photoUploadStatusDot"
+            class="status status-info status-sm"
+          ></span>
+          <span id="photoUploadStatusText"></span>
+          <button
+            id="photoUploadRetry"
+            type="button"
+            class="btn btn-link btn-sm hidden"
+          >
+            {{t 'lang.PHOTO_RETRY'}}
+          </button>
+        </div>
+        <button
+          id="photoBtn"
+          type="submit"
+          class="btn btn-primary w-full"
+          disabled
+        >
+          {{#if garment.photo}}{{t 'lang.UPDATE_PHOTO'}}{{else}}{{t
+          'lang.ADD_PHOTO'}}{{/if}}
+          <span
+            id="photoSavingSpinner"
+            class="htmx-indicator loading loading-spinner loading-xs"
+          ></span>
+        </button>
+      </form>
     </div>
-  </form>
+  </details>
   <script type="module">
-    import { wireUpPhotoInput, wireUpEditMaskBtn, isBgRemovalEnabled } from '/js/background-removal.js';
+    const savedMessage = sessionStorage.getItem('photoUploadMessage');
+    if (savedMessage) {
+      sessionStorage.removeItem('photoUploadMessage');
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-top toast-center z-20 top-20';
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-success shadow-md';
+      const text = document.createElement('span');
+      text.textContent = savedMessage;
+      alert.append(text);
+      toast.append(alert);
+      document.body.append(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
 
-    const toggle = document.getElementById('bgRemovalToggle');
-    const stored = localStorage.getItem('bgRemovalEnabled');
-    toggle.checked = stored === null ? true : stored !== 'false';
-    localStorage.setItem('bgRemovalEnabled', toggle.checked);
+    const photoInput = document.getElementById('photoInput');
+    const nobgInput = document.getElementById('nobgPhotoInput');
+    const photoButton = document.getElementById('photoBtn');
+    const editButton = document.getElementById('editNewPhoto');
+    const frameButton = document.getElementById('frameNewPhoto');
+    const editingActions = document.getElementById('photoEditingActions');
+    const editingStatus = document.getElementById('photoEditStatus');
+    const preview = document.getElementById('photoPreview');
+    const previewImage = document.getElementById('photoPreviewImage');
 
-    toggle.addEventListener('change', () => {
-      localStorage.setItem('bgRemovalEnabled', toggle.checked);
-      const editBtn = document.getElementById('editMaskBtn');
-      if (editBtn) editBtn.style.display = toggle.checked ? '' : 'none';
-
-      if (toggle.checked) {
-        const photoInput = document.getElementById('photoInput');
-        if (photoInput?.files?.length) {
-          photoInput.dispatchEvent(new Event('change'));
-        }
+    const setPreview = (file) => {
+      previewImage.src = URL.createObjectURL(file);
+      preview.classList.remove('hidden');
+    };
+    const setEditingStatus = (message) => {
+      editingStatus.textContent = message;
+      editingStatus.classList.remove('hidden');
+    };
+    photoInput.addEventListener('change', () => {
+      const file = photoInput.files?.[0];
+      editingActions.classList.toggle('hidden', !file);
+      if (photoButton) photoButton.disabled = !file;
+      if (file) setPreview(file);
+    });
+    editButton.addEventListener('click', async () => {
+      const file = photoInput.files?.[0];
+      if (!file) return;
+      editButton.disabled = true;
+      editButton.querySelector('.loading').classList.remove('hidden');
+      editButton.querySelector('.button-label').textContent = 'Removing background…';
+      setEditingStatus('Preparing your photo, then opening the mask editor…');
+      try {
+        const { prepareBackgroundRemovedImage } = await import('/js/background-removal.js');
+        const result = await prepareBackgroundRemovedImage(file);
+        const processed = new File([result], 'nobg.webp', { type: 'image/webp' });
+        const files = new DataTransfer();
+        files.items.add(processed);
+        nobgInput.files = files.files;
+        setPreview(processed);
+        setEditingStatus('Background removed and centered — ready to update.');
+      } catch (error) {
+        console.warn('[bg-removal] Cleanup failed:', error);
+        setEditingStatus('Background cleanup could not be completed. Your original photo is still ready to update.');
+      } finally {
+        editButton.disabled = false;
+        editButton.querySelector('.loading').classList.add('hidden');
+        editButton.querySelector('.button-label').textContent = 'Remove & refine background';
       }
     });
-
-    wireUpPhotoInput();
-    {{#if garment.photo}}
-    wireUpEditMaskBtn('{{garment.photo.fileName}}', {{garment.id}});
-    if (!isBgRemovalEnabled()) {
-      document.getElementById('editMaskBtn')?.style.setProperty('display', 'none');
-    }
-    {{/if}}
+    frameButton.addEventListener('click', async () => {
+      const file = nobgInput.files?.[0] || photoInput.files?.[0];
+      if (!file) return;
+      frameButton.disabled = true;
+      setEditingStatus('Opening framing controls…');
+      try {
+        const { openFrameEditor } = await import('/js/frame-editor.js');
+        const result = await openFrameEditor(file);
+        const framed = new File([result], 'nobg.webp', { type: 'image/webp' });
+        const files = new DataTransfer();
+        files.items.add(framed);
+        if (nobgInput.files?.length) nobgInput.files = files.files;
+        else photoInput.files = files.files;
+        setPreview(framed);
+        setEditingStatus('Framing adjusted — ready to update.');
+      } finally {
+        frameButton.disabled = false;
+      }
+    });
+    import('/js/background-removal.js').then(({ wireUpPhotoUploadFeedback, wireUpEditMaskBtn }) => {
+      wireUpPhotoUploadFeedback();
+      {{#if garment.photo}}
+      wireUpEditMaskBtn('{{garment.photo.fileName}}', {{garment.id}});
+      {{/if}}
+    }).catch((error) => console.warn('[photo-tools] Failed to load:', error));
   </script>
   {{/if}} {{!-- Metadata --}}
-  <div class="card bg-base-100 shadow-sm mb-4">
-    <div class="card-body gap-3">
-      <div class="flex justify-between">
-        <span class="text-base-content/60 text-sm">{{t 'lang.CATEGORY'}}</span>
-        <span class="capitalize font-medium">{{categoryLabel}}</span>
+  <section class="card card-border bg-base-100">
+    <div class="card-body gap-4 p-5">
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="card-title text-base">Garment details</h2>
+        <span class="badge badge-soft capitalize">{{categoryLabel}}</span>
       </div>
-      {{#if garment.brand}}
-      <div class="flex justify-between">
-        <span class="text-base-content/60 text-sm">{{t 'lang.BRAND'}}</span>
-        <span class="font-medium">{{garment.brand}}</span>
-      </div>
-      {{/if}} {{#if garment.size}}
-      <div class="flex justify-between">
-        <span class="text-base-content/60 text-sm">{{t 'lang.SIZE'}}</span>
-        <span class="font-medium">{{garment.size}}</span>
-      </div>
-      {{/if}}       {{#if garment.color}}
-      <div class="flex justify-between">
-        <span class="text-base-content/60 text-sm">{{t 'lang.COLOR'}}</span>
-        <span class="capitalize font-medium"
-          >{{formatColors garment.color}}</span
+      <ul class="list -mx-2">
+        {{#if garment.brand}}
+        <li class="list-row px-2 py-2">
+          <span class="text-sm text-base-content/60">{{t 'lang.BRAND'}}</span
+          ><span class="text-right font-medium">{{garment.brand}}</span>
+        </li>
+        {{/if}} {{#if garment.size}}
+        <li class="list-row px-2 py-2">
+          <span class="text-sm text-base-content/60">{{t 'lang.SIZE'}}</span
+          ><span class="text-right font-medium">{{garment.size}}</span>
+        </li>
+        {{/if}} {{#if garment.color}}
+        <li class="list-row px-2 py-2">
+          <span class="text-sm text-base-content/60">{{t 'lang.COLOR'}}</span
+          ><span class="text-right font-medium capitalize"
+            >{{formatColors garment.color}}</span
+          >
+        </li>
+        {{/if}} {{#if garment.dateAquired}}
+        <li class="list-row px-2 py-2">
+          <span class="text-sm text-base-content/60"
+            >{{t 'lang.DATE_AQUIRED'}}</span
+          ><span class="text-right font-medium"
+            >{{formatDate garment.dateAquired}}</span
+          >
+        </li>
+        {{/if}}
+      </ul>
+      {{#if garment.washingDetails}}
+      <div class="rounded-box bg-base-200 p-3">
+        <p
+          class="text-xs font-semibold uppercase tracking-wider text-base-content/55"
         >
-      </div>
-      {{/if}} {{#if garment.washingDetails}}
-      <div class="flex flex-col gap-1">
-        <span class="text-base-content/60 text-sm">{{t 'lang.WASHING_DETAILS'}}</span>
-        <p class="text-sm">{{garment.washingDetails}}</p>
-      {{/if}} {{#if garment.dateAquired}}
-      <div class="flex justify-between">
-        <span class="text-base-content/60 text-sm">{{t 'lang.DATE_AQUIRED'}}</span>
-        <span class="font-medium">{{formatDate garment.dateAquired}}</span>
+          {{t 'lang.WASHING_DETAILS'}}
+        </p>
+        <p class="mt-1 break-words text-sm leading-6">
+          {{garment.washingDetails}}
+        </p>
       </div>
       {{/if}} {{#if garment.notes}}
-      <div class="flex flex-col gap-1">
-        <span class="text-base-content/60 text-sm">{{t 'lang.NOTES'}}</span>
-        <p class="text-sm">{{garment.notes}}</p>
+      <div class="border-t border-base-300 pt-4">
+        <p
+          class="text-xs font-semibold uppercase tracking-wider text-base-content/55"
+        >
+          {{t 'lang.NOTES'}}
+        </p>
+        <p class="mt-1 break-words text-sm leading-6">{{garment.notes}}</p>
       </div>
       {{/if}}
     </div>
-  </div>
-  {{!-- Edit --}} {{#if canEdit}}
-  <div class="flex gap-2 mb-6">
-    <a
-      href="/wardrobe/{{garment.id}}/edit{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
-      class="btn btn-outline btn-sm flex-1"
-    >
-      {{t 'lang.EDIT'}}
-    </a>
-  </div>
-  {{/if}}
-
-  {{!-- Clone --}}
-  {{#if canClone}}
-  <div class="flex gap-2 mb-6">
-    <a
-      href="/wardrobe/{{garment.id}}/clone{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
-      class="btn btn-outline btn-sm flex-1"
-    >
-      {{t 'lang.CLONE_GARMENT'}}
-    </a>
-  </div>
-  {{/if}}
-
-  {{!-- Share --}}
-  {{#if canEdit}}
-  <div class="flex gap-2 mb-6">
+  </section>
+  {{!-- Share --}} {{#if canEdit}}
+  <div class="hidden">
     <button
       class="btn btn-outline btn-sm flex-1"
       onclick="navigator.clipboard.writeText('{{siteUrl}}/share?shareableId={{garment.shareableId}}&type=garment'); alert('{{t 'lang.COPIED'}}')"
@@ -256,24 +486,19 @@
       {{t 'lang.SHARE'}}
     </button>
   </div>
-  {{/if}}
-
-  {{!-- Archive --}}
-  {{#if canDelete}}
+  {{/if}} {{!-- Archive --}} {{#if canDelete}}
   <button
-    class="btn btn-outline btn-sm w-full mb-6"
+    class="btn btn-outline btn-sm hidden"
     hx-post="/wardrobe/{{garment.id}}/archive"
     hx-confirm="{{#if garment.archived}}{{t 'lang.CONFIRM_UNARCHIVE'}}{{else}}{{t 'lang.CONFIRM_ARCHIVE'}}{{/if}}"
     hx-indicator="#loading"
   >
-    {{#if garment.archived}}{{t 'lang.UNARCHIVE'}}{{else}}{{t 'lang.ARCHIVE'}}{{/if}}
+    {{#if garment.archived}}{{t 'lang.UNARCHIVE'}}{{else}}{{t
+    'lang.ARCHIVE'}}{{/if}}
   </button>
-  {{/if}}
-
-  {{!-- Delete --}}
-  {{#if canDelete}}
+  {{/if}} {{!-- Delete --}} {{#if canDelete}}
   <button
-    class="btn btn-error btn-outline btn-sm w-full"
+    class="btn btn-error btn-outline btn-sm hidden"
     hx-delete="/wardrobe/{{garment.id}}"
     hx-confirm="{{t 'lang.CONFIRM_DELETE'}}"
     hx-indicator="#loading"
@@ -341,6 +566,7 @@
       <button>close</button>
     </form>
   </dialog>
+  {{> frameEditor}}
 </main>
 
 {{>dock}}

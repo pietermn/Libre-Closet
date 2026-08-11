@@ -12,7 +12,8 @@
 
 let activeProgressHandler = null;
 
-export const isBgRemovalEnabled = () => localStorage.getItem('bgRemovalEnabled') !== 'false';
+export const isBgRemovalEnabled = () =>
+  localStorage.getItem('bgRemovalEnabled') !== 'false';
 
 const config = {
   publicPath: location.origin + '/bg-removal-models/',
@@ -79,6 +80,60 @@ const squarePadBlob = async (blob) => {
   return canvas.convertToBlob({ type: 'image/png' });
 };
 
+/**
+ * Recentres the visible subject after background removal. The mask editor
+ * deliberately operates on the untouched, square-padded result so its restore
+ * brush remains aligned with the original. This runs only after editing, just
+ * before upload, to give the wardrobe card a tighter and more balanced frame.
+ * @param {Blob} blob
+ * @returns {Promise<Blob>}
+ */
+const centerAndCropTransparentBlob = async (blob) => {
+  const bitmap = await createImageBitmap(blob);
+  const source = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const sourceCtx = source.getContext('2d', { willReadFrequently: true });
+  sourceCtx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  const { data, width, height } = sourceCtx.getImageData(
+    0,
+    0,
+    source.width,
+    source.height,
+  );
+  let left = width;
+  let top = height;
+  let right = -1;
+  let bottom = -1;
+
+  // Ignore near-transparent anti-aliased pixels when finding the subject.
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (data[(y * width + x) * 4 + 3] > 16) {
+        left = Math.min(left, x);
+        top = Math.min(top, y);
+        right = Math.max(right, x);
+        bottom = Math.max(bottom, y);
+      }
+    }
+  }
+
+  // Keep the original if background removal produced a fully transparent file.
+  if (right < left || bottom < top) return blob;
+
+  const subjectWidth = right - left + 1;
+  const subjectHeight = bottom - top + 1;
+  // Reserve 12% padding on each side around the subject in the final square.
+  const outputSize = Math.ceil(Math.max(subjectWidth, subjectHeight) / 0.76);
+  const cropCenterX = (left + right + 1) / 2;
+  const cropCenterY = (top + bottom + 1) / 2;
+  const cropLeft = cropCenterX - outputSize / 2;
+  const cropTop = cropCenterY - outputSize / 2;
+  const output = new OffscreenCanvas(outputSize, outputSize);
+  output.getContext('2d').drawImage(source, -cropLeft, -cropTop, width, height);
+  return output.convertToBlob({ type: 'image/webp', quality: 0.95 });
+};
+
 let mod = await import('/modules/background-removal/index.mjs');
 let removeBackground = mod.removeBackground;
 
@@ -95,6 +150,13 @@ export const initBackgroundRemoval = async () => {
     console.warn('[bg-removal] Failed to load background-removal module:', err);
     return;
   }
+};
+
+export const prepareBackgroundRemovedImage = async (file) => {
+  const squareFile = await squarePadBlob(file);
+  const rawBlob = await removeBackground(squareFile, config);
+  const editedBlob = await openMaskEditor(squareFile, rawBlob);
+  return centerAndCropTransparentBlob(editedBlob);
 };
 
 export const wireUpPhotoInput = async () => {
@@ -115,11 +177,10 @@ export const wireUpPhotoInput = async () => {
     if (!file) return;
 
     if (!isBgRemovalEnabled()) {
+      photoInput.dispatchEvent(new Event('photo-upload-ready'));
       if (submitBtn) submitBtn.disabled = false;
       return;
     }
-
-    const squareFile = await squarePadBlob(file);
 
     if (submitBtn) submitBtn.disabled = true;
     if (bgStatus) bgStatus.classList.remove('hidden');
@@ -161,12 +222,12 @@ export const wireUpPhotoInput = async () => {
 
     try {
       console.log(config);
-      const rawBlob = await removeBackground(squareFile, config);
-      const blob = await openMaskEditor(squareFile, rawBlob);
+      const blob = await prepareBackgroundRemovedImage(file);
 
       const dt = new DataTransfer();
       dt.items.add(new File([blob], 'nobg.webp', { type: 'image/webp' }));
       nobgInput.files = dt.files;
+      photoInput.dispatchEvent(new Event('photo-upload-ready'));
     } catch (err) {
       // Processing failed — clear any partial result and let server fallback run
       console.warn(
@@ -174,6 +235,7 @@ export const wireUpPhotoInput = async () => {
         err,
       );
       nobgInput.value = '';
+      photoInput.dispatchEvent(new Event('photo-upload-ready'));
     } finally {
       clearTimeout(stillWorkingTimer);
       fallbackTimers.forEach(clearTimeout);
@@ -184,6 +246,77 @@ export const wireUpPhotoInput = async () => {
   });
 
   console.log('wired up photo input for background removal');
+};
+
+/** Provides immediate, accessible feedback around the photo upload request. */
+export const wireUpPhotoUploadFeedback = () => {
+  const form = document.getElementById('photoUploadForm');
+  const input = document.getElementById('photoInput');
+  const preview = document.getElementById('photoPreview');
+  const previewImage = document.getElementById('photoPreviewImage');
+  const status = document.getElementById('photoUploadStatus');
+  const statusText = document.getElementById('photoUploadStatusText');
+  const statusDot = document.getElementById('photoUploadStatusDot');
+  const retry = document.getElementById('photoUploadRetry');
+  if (!form || !input || !preview || !previewImage || !status || !statusText)
+    return;
+
+  let previewUrl;
+  const setStatus = (kind, message, canRetry = false) => {
+    status.classList.remove('hidden', 'text-info', 'text-success', 'text-error');
+    status.classList.add(
+      kind === 'error'
+        ? 'text-error'
+        : kind === 'success'
+          ? 'text-success'
+          : 'text-info',
+    );
+    statusDot?.classList.remove('status-info', 'status-success', 'status-error');
+    statusDot?.classList.add(
+      kind === 'error'
+        ? 'status-error'
+        : kind === 'success'
+          ? 'status-success'
+          : 'status-info',
+    );
+    statusText.textContent = message;
+    retry?.classList.toggle('hidden', !canRetry);
+  };
+
+  input.addEventListener('change', () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+    previewImage.src = previewUrl;
+    preview.classList.remove('hidden');
+    setStatus(
+      'info',
+      document.getElementById('bgRemovalToggle')?.checked
+        ? document.getElementById('bgStatusText')?.textContent ||
+            'Preparing photo…'
+        : status.dataset.readyText,
+    );
+  });
+
+  input.addEventListener('photo-upload-ready', () =>
+    setStatus('info', status.dataset.readyText),
+  );
+  form.addEventListener('htmx:beforeRequest', () =>
+    setStatus('info', status.dataset.savingText),
+  );
+  form.addEventListener('htmx:responseError', () =>
+    setStatus('error', status.dataset.failedText, true),
+  );
+  form.addEventListener('htmx:sendError', () =>
+    setStatus('error', status.dataset.failedText, true),
+  );
+  retry?.addEventListener('click', () => form.requestSubmit());
+
+  form.addEventListener('htmx:afterRequest', (event) => {
+    if (!event.detail.successful) return;
+    sessionStorage.setItem('photoUploadMessage', status.dataset.savedText);
+  });
 };
 
 /**
@@ -210,7 +343,9 @@ export const wireUpEditMaskBtn = async (fileName, garmentId) => {
       // Square-pad the original to match the layout used during initial upload,
       // so the restore brush samples from the correct pixel positions.
       const squaredBlob = await squarePadBlob(origBlob);
-      const squaredFile = new File([squaredBlob], fileName, { type: 'image/png' });
+      const squaredFile = new File([squaredBlob], fileName, {
+        type: 'image/png',
+      });
 
       const editedBlob = await openMaskEditor(squaredFile, nobgBlob);
 
@@ -218,8 +353,14 @@ export const wireUpEditMaskBtn = async (fileName, garmentId) => {
       if (editedBlob === nobgBlob) return;
 
       const formData = new FormData();
-      formData.append('nobgPhoto', new File([editedBlob], 'nobg.webp', { type: 'image/webp' }));
-      await fetch(`/wardrobe/${garmentId}/nobg`, { method: 'POST', body: formData });
+      formData.append(
+        'nobgPhoto',
+        new File([editedBlob], 'nobg.webp', { type: 'image/webp' }),
+      );
+      await fetch(`/wardrobe/${garmentId}/nobg`, {
+        method: 'POST',
+        body: formData,
+      });
 
       // Display the edited result directly from the in-memory blob — avoids
       // any browser cache serving the old nobg image after the POST.
@@ -240,6 +381,8 @@ export default {
   isBgRemovalEnabled,
   initBackgroundRemoval,
   wireUpPhotoInput,
+  wireUpPhotoUploadFeedback,
+  prepareBackgroundRemovedImage,
   wireUpEditMaskBtn,
 };
 

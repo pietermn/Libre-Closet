@@ -1,0 +1,27 @@
+<dialog id="frameEditorDialog" class="modal">
+  <div class="modal-box w-full max-w-lg p-4">
+    <h3 class="text-lg font-bold">Adjust framing</h3>
+    <p class="mt-1 text-sm text-base-content/60">Drag the image to pan. Use zoom and padding to set the final square composition.</p>
+
+    <div class="mt-4 overflow-hidden rounded-box border border-base-300 bg-base-200">
+      <canvas id="frameEditorCanvas" class="block aspect-square w-full cursor-grab touch-none active:cursor-grabbing" style="background-image:linear-gradient(45deg,#cccccc 25%,transparent 25%),linear-gradient(-45deg,#cccccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#cccccc 75%),linear-gradient(-45deg,#cccccc 75%,transparent 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;background-color:#ffffff;"></canvas>
+    </div>
+
+    <div class="mt-4 grid gap-3">
+      <label class="fieldset">
+        <span class="fieldset-legend">Zoom</span>
+        <input id="frameEditorZoom" type="range" min="100" max="300" value="100" class="range range-primary range-sm" />
+      </label>
+      <label class="fieldset">
+        <span class="fieldset-legend">Padding</span>
+        <input id="frameEditorPadding" type="range" min="0" max="35" value="12" class="range range-primary range-sm" />
+      </label>
+    </div>
+
+    <div class="modal-action">
+      <button id="frameEditorCancel" type="button" class="btn btn-ghost">Cancel</button>
+      <button id="frameEditorAccept" type="button" class="btn btn-primary">Use framing</button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button id="frameEditorBackdrop" type="submit">close</button></form>
+</dialog>
