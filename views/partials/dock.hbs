@@ -1,31 +1,28 @@
-<div class='dock'>
-  <a {{#ifEquals baseUrl "/wardrobe"}} class='dock-active' {{/ifEquals}} href='/wardrobe'>
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-      <path
-        d="M4.12572 15.3668L10.1284 11.9903C10.7234 11.6556 11.3252 11.5 12 11.5C12.6748 11.5 13.2766 11.6556 13.8716 11.9903L19.8743 15.3668C20.5697 15.7579 21 16.4937 21 17.2916C21 18.5113 20.0113 19.5 18.7916 19.5H5.20841C3.98874 19.5 3 18.5113 3 17.2916C3 16.4937 3.43034 15.7579 4.12572 15.3668Z"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        data-src="https://cdn.hugeicons.com/icons/hanger-stroke-rounded.svg?v=1.0.0"
-      ></path>
-      <path
-        d="M10 6.40476C10 5.35279 10.8954 4.5 12 4.5C13.1046 4.5 14 5.35279 14 6.40476C14 7.12453 13.5808 7.75106 12.9623 8.07498C12.473 8.33119 12 8.75724 12 9.30952V11.5"
-        stroke-width="1.5"
-        stroke-linecap="round"
-      ></path>    
-    </svg>
-    <span class='dock-label'>{{t 'lang.WARDROBE'}}</span>
+<nav class="fixed left-1/2 right-auto bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 flex h-[4.25rem] w-[min(24rem,calc(100%-2rem))] -translate-x-1/2 items-center justify-around gap-1 rounded-box border border-base-content/10 bg-base-100/88 p-1.5 shadow-lg backdrop-blur-xl" aria-label="Primary navigation">
+  <a href="/wardrobe" class="flex min-h-14 flex-1 items-center justify-center rounded-box px-2 text-base-content/55 transition-[background-color,color,transform] duration-150 ease-out hover:bg-base-200/90 hover:text-base-content active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none {{#ifEquals baseUrl "/wardrobe"}}text-primary{{/ifEquals}}" {{#ifEquals baseUrl "/wardrobe"}}aria-current="page"{{/ifEquals}}>
+    <span class="grid size-11 place-items-center rounded-box transition-[background-color,color,transform] duration-150 ease-out motion-reduce:transition-none {{#ifEquals baseUrl "/wardrobe"}}bg-primary text-primary-content shadow-sm{{/ifEquals}}">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="size-6" aria-hidden="true">
+        <path d="M4.12572 15.3668L10.1284 11.9903C10.7234 11.6556 11.3252 11.5 12 11.5C12.6748 11.5 13.2766 11.6556 13.8716 11.9903L19.8743 15.3668C20.5697 15.7579 21 16.4937 21 17.2916C21 18.5113 20.0113 19.5 18.7916 19.5H5.20841C3.98874 19.5 3 18.5113 3 17.2916C3 16.4937 3.43034 15.7579 4.12572 15.3668Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M10 6.40476C10 5.35279 10.8954 4.5 12 4.5C13.1046 4.5 14 5.35279 14 6.40476C14 7.12453 13.5808 7.75106 12.9623 8.07498C12.473 8.33119 12 8.75724 12 9.30952V11.5" stroke-width="1.5" stroke-linecap="round"></path>
+      </svg>
+    </span>
+    <span class="sr-only">{{t 'lang.WARDROBE'}}</span>
   </a>
-  <a {{#ifEquals baseUrl "/outfits"}} class='dock-active' {{/ifEquals}} href='/outfits'>
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
-    </svg>
-    <span class='dock-label'>{{t 'lang.OUTFITS'}}</span>
+  <a href="/outfits" class="flex min-h-14 flex-1 items-center justify-center rounded-box px-2 text-base-content/55 transition-[background-color,color,transform] duration-150 ease-out hover:bg-base-200/90 hover:text-base-content active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none {{#ifEquals baseUrl "/outfits"}}text-primary{{/ifEquals}}" {{#ifEquals baseUrl "/outfits"}}aria-current="page"{{/ifEquals}}>
+    <span class="grid size-11 place-items-center rounded-box transition-[background-color,color,transform] duration-150 ease-out motion-reduce:transition-none {{#ifEquals baseUrl "/outfits"}}bg-primary text-primary-content shadow-sm{{/ifEquals}}">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="size-6" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 4.5h9A2.25 2.25 0 0 1 18 6.75v9A2.25 2.25 0 0 1 15.75 18h-9a2.25 2.25 0 0 1-2.25-2.25v-9A2.25 2.25 0 0 1 6.75 4.5Z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75h7.5m-7.5 4.5h4.5" />
+      </svg>
+    </span>
+    <span class="sr-only">{{t 'lang.OUTFITS'}}</span>
   </a>
-  <a {{#ifEquals baseUrl "/calendar"}} class='dock-active' {{/ifEquals}} href='/calendar'>
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
-    </svg>
-    <span class='dock-label'>{{t 'lang.CALENDAR'}}</span>
+  <a href="/calendar" class="flex min-h-14 flex-1 items-center justify-center rounded-box px-2 text-base-content/55 transition-[background-color,color,transform] duration-150 ease-out hover:bg-base-200/90 hover:text-base-content active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none {{#ifEquals baseUrl "/calendar"}}text-primary{{/ifEquals}}" {{#ifEquals baseUrl "/calendar"}}aria-current="page"{{/ifEquals}}>
+    <span class="grid size-11 place-items-center rounded-box transition-[background-color,color,transform] duration-150 ease-out motion-reduce:transition-none {{#ifEquals baseUrl "/calendar"}}bg-primary text-primary-content shadow-sm{{/ifEquals}}">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="size-6" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+      </svg>
+    </span>
+    <span class="sr-only">{{t 'lang.CALENDAR'}}</span>
   </a>
-</div>
+</nav>
