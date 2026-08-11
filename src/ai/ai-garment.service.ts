@@ -68,7 +68,10 @@ export class AiGarmentService {
         body: JSON.stringify({
           model: this.config.get<string>('OPENAI_MODEL', 'gpt-5.6-luna'),
           store: false,
-          max_output_tokens: 180,
+          // This is a fast classification task. Avoid spending the response
+          // budget on reasoning so there is always room for the JSON schema.
+          reasoning: { effort: 'none' },
+          max_output_tokens: 320,
           input: [
             {
               role: 'user',
@@ -144,7 +147,8 @@ export class AiGarmentService {
         ),
       };
     } catch (error) {
-      this.logger.warn('Garment analysis failed', error);
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Garment analysis failed: ${message}`);
       return { available: true };
     }
   }
