@@ -22,13 +22,21 @@ import { User } from '../auth/user.decorator';
 import { WardrobeShareService } from './wardrobe-share.service';
 import { SharePermission } from '../dal/entity/wardrobe-share.entity';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { ConfigService } from '@nestjs/config';
 
 @UseGuards(ConditionalAuthGuard)
 @Controller('wardrobe-share')
 export class WardrobeShareController {
   private readonly logger = new Logger(WardrobeShareController.name);
 
-  constructor(private readonly shareService: WardrobeShareService) {}
+  constructor(
+    private readonly shareService: WardrobeShareService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  private get siteUrl(): string {
+    return this.configService.getOrThrow<string>('SITE_URL').replace(/\/$/, '');
+  }
 
   @UseGuards(AuthGuard)
   @Get('manage')
@@ -57,7 +65,7 @@ export class WardrobeShareController {
       outbound: outbound.map(mapShare),
       inbound: inbound.map(mapShare),
       pending: pending.map(mapShare),
-      baseUrl: `${req.protocol}://${req.headers.host}`,
+      baseUrl: this.siteUrl,
       error: error ?? null,
     };
   }
@@ -70,11 +78,17 @@ export class WardrobeShareController {
     @Req() req: FastifyRequest,
     @Res() reply: FastifyReply,
   ) {
+    if (
+      body.permission != null &&
+      !Object.values(SharePermission).includes(body.permission)
+    ) {
+      throw new BadRequestException('Invalid share permission');
+    }
     const share = await this.shareService.createInviteLink(
       payload.userId,
       body.permission || SharePermission.VIEW,
     );
-    const inviteUrl = `${req.protocol}://${req.headers.host}/wardrobe-share/invite/${share.inviteToken}`;
+    const inviteUrl = `${this.siteUrl}/wardrobe-share/invite/${share.inviteToken}`;
 
     if (req.headers['hx-request']) {
       return reply.viewPartial('wardrobe-share/partials/invite-link-result', {

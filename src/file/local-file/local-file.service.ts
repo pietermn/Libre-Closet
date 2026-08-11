@@ -20,6 +20,7 @@ import { FileService } from '../file-service.abstract';
 @Injectable()
 export class LocalFileService extends FileService {
   private directory: string;
+  private legacyDirectory: string;
 
   constructor(
     readonly configService: ConfigService,
@@ -29,7 +30,8 @@ export class LocalFileService extends FileService {
   ) {
     super(configService);
     this.logger.debug('constructor');
-    this.directory = configService.getOrThrow('DATA_PATH');
+    this.legacyDirectory = configService.getOrThrow('DATA_PATH');
+    this.directory = path.join(this.legacyDirectory, 'uploads');
     this.setupDir();
   }
 
@@ -113,9 +115,13 @@ export class LocalFileService extends FileService {
   }
 
   async get(fileName: string): Promise<Readable | undefined> {
-    if (fs.existsSync(path.join(this.directory, fileName))) {
+    if (!this.isSafeFileName(fileName)) {
+      throw new NotFoundException(fileName);
+    }
+    const filePath = this.resolveExistingFilePath(fileName);
+    if (filePath) {
       return new Promise((resolve) =>
-        resolve(fs.createReadStream(path.join(this.directory, fileName))),
+        resolve(fs.createReadStream(filePath)),
       );
     } else {
       throw new NotFoundException(fileName);
@@ -124,11 +130,9 @@ export class LocalFileService extends FileService {
 
   async getByShareableId(shareableId: string): Promise<Readable> {
     const file = await this.fileRepository.findOneOrFail({ shareableId });
-    if (fs.existsSync(path.join(this.directory, file.fileName))) {
-      return fs.createReadStream(path.join(this.directory, file.fileName));
-    } else {
-      throw new NotFoundException(file.fileName);
-    }
+    const stream = await this.get(file.fileName);
+    if (stream) return stream;
+    throw new NotFoundException(file.fileName);
   }
 
   async delete(fileName: string): Promise<void> {
@@ -165,5 +169,15 @@ export class LocalFileService extends FileService {
 
   private deleteFile(fileName: string): Promise<void> {
     return fs.promises.unlink(path.join(this.directory, fileName));
+  }
+
+  private resolveExistingFilePath(fileName: string): string | undefined {
+    const uploadPath = path.join(this.directory, fileName);
+    if (fs.existsSync(uploadPath)) return uploadPath;
+
+    // Existing installations stored generated images directly in DATA_PATH.
+    // Keep this read-only fallback during migration without re-exposing DB/logs.
+    const legacyPath = path.join(this.legacyDirectory, fileName);
+    return fs.existsSync(legacyPath) ? legacyPath : undefined;
   }
 }

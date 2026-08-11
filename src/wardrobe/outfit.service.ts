@@ -79,9 +79,7 @@ export class OutfitService {
         .filter((id): id is number => id !== null) ?? [];
 
     if (garmentIds.length) {
-      const garments = await this.garmentRepository.find({
-        id: { $in: garmentIds },
-      });
+      const garments = await this.findAuthorizedGarments(garmentIds, userId);
       outfit.garments.set(garments);
     }
 
@@ -111,9 +109,7 @@ export class OutfitService {
       const garmentIds = dto.slots
         .map((s) => s.garmentId)
         .filter((id): id is number => id !== null);
-      const garments = await this.garmentRepository.find({
-        id: { $in: garmentIds },
-      });
+      const garments = await this.findAuthorizedGarments(garmentIds, userId);
       outfit.garments.set(garments);
     }
 
@@ -144,6 +140,22 @@ export class OutfitService {
       category: cat,
       garmentId: ids[i] ? Number(ids[i]) : null,
     }));
+  }
+
+  private async findAuthorizedGarments(
+    garmentIds: number[],
+    userId?: number,
+  ): Promise<Garment[]> {
+    const uniqueIds = [...new Set(garmentIds)];
+    const garments = await this.garmentRepository.find(
+      userId != null
+        ? { id: { $in: uniqueIds }, owner: { id: userId } }
+        : { id: { $in: uniqueIds }, owner: null },
+    );
+    if (garments.length !== uniqueIds.length) {
+      throw new ForbiddenException('One or more garments are unavailable');
+    }
+    return garments;
   }
 
   buildCategoryRows(

@@ -1,6 +1,7 @@
 import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import {
+  BadRequestException,
   Controller,
   Get,
   Header,
@@ -61,6 +62,7 @@ export class FileController {
   @Get(':fileName')
   @Header('Cache-Control', 'public, max-age=31536000, immutable') // public for CDN, max-age= 1 year for immutable content
   async getFile(@Param('fileName') fileName: string) {
+    this.assertSafeFileName(fileName);
     return this.fileService.get(fileName);
   }
 
@@ -75,6 +77,7 @@ export class FileController {
   @Get('nobg/:fileName')
   @Header('content-type', 'image/webp')
   async nobg(@Param('fileName') fileName: string, @Res() reply: FastifyReply) {
+    this.assertSafeFileName(fileName);
     const stream = await this.fileService.getNobgVariant(fileName);
     if (!stream) {
       return reply
@@ -90,5 +93,11 @@ export class FileController {
       }
     });
     return reply.send(stream);
+  }
+
+  private assertSafeFileName(fileName: string): void {
+    if (!this.fileService.isSafeFileName(fileName)) {
+      throw new BadRequestException('Invalid file name');
+    }
   }
 }
