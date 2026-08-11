@@ -6,6 +6,10 @@
       href="/wardrobe{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
       class="btn btn-ghost btn-sm btn-circle"
       aria-label="Back to wardrobe"
+      onclick="
+        window.history.back();
+        return false;
+      "
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -23,33 +27,108 @@
       </svg>
     </a>
     <div class="min-w-0 flex-1">
-      <p class="text-xs font-medium uppercase tracking-wider text-base-content/50">Garment</p>
+      <p
+        class="text-xs font-medium uppercase tracking-wider text-base-content/50"
+      >
+        Garment
+      </p>
       <h1 class="truncate text-balance text-2xl font-bold">{{garment.name}}</h1>
     </div>
     {{#if canEdit}}
     <div class="tooltip tooltip-bottom shrink-0" data-tip="Edit garment">
-      <a href="/wardrobe/{{garment.id}}/edit{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}" class="btn btn-ghost btn-square btn-sm shrink-0" aria-label="Edit garment">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" /></svg>
+      <a
+        href="/wardrobe/{{garment.id}}/edit{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
+        class="btn btn-ghost btn-square btn-sm shrink-0"
+        aria-label="Edit garment"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.8"
+          stroke="currentColor"
+          class="size-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"
+          />
+        </svg>
       </a>
     </div>
-    {{/if}}
-    {{#if canEdit}}
+    {{/if}} {{#if canEdit}}
     <div class="tooltip tooltip-bottom shrink-0" data-tip="Share garment">
-      <button type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="Share garment" onclick="navigator.clipboard.writeText('{{siteUrl}}/share?shareableId={{garment.shareableId}}&type=garment'); alert('{{t 'lang.COPIED'}}')">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.935-2.185 2.25 2.25 0 0 0-3.935 2.185Z" /></svg>
+      <button
+        type="button"
+        class="btn btn-ghost btn-sm btn-circle"
+        aria-label="Share garment"
+        onclick="navigator.clipboard.writeText('{{siteUrl}}/share?shareableId={{garment.shareableId}}&type=garment'); alert('{{t 'lang.COPIED'}}')"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.8"
+          stroke="currentColor"
+          class="size-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.935-2.185 2.25 2.25 0 0 0-3.935 2.185Z"
+          />
+        </svg>
       </button>
     </div>
-    {{/if}}
-    {{#if canEdit}}
+    {{/if}} {{#if canEdit}}
     <details class="dropdown dropdown-end shrink-0">
-      <summary class="btn btn-ghost btn-square btn-sm shrink-0 list-none" aria-label="More garment actions">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="size-5"><path d="M12 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" /></svg>
+      <summary
+        class="btn btn-ghost btn-square btn-sm shrink-0 list-none"
+        aria-label="More garment actions"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+          class="size-5"
+        >
+          <path
+            d="M12 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm0 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"
+          />
+        </svg>
       </summary>
-      <ul class="menu dropdown-content z-30 mt-2 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
-        {{#if canClone}}<li><a href="/wardrobe/{{garment.id}}/clone{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}">{{t 'lang.CLONE_GARMENT'}}</a></li>{{/if}}
-        {{#if canDelete}}
-        <li><button hx-post="/wardrobe/{{garment.id}}/archive" hx-confirm="{{#if garment.archived}}{{t 'lang.CONFIRM_UNARCHIVE'}}{{else}}{{t 'lang.CONFIRM_ARCHIVE'}}{{/if}}" hx-indicator="#loading">{{#if garment.archived}}{{t 'lang.UNARCHIVE'}}{{else}}{{t 'lang.ARCHIVE'}}{{/if}}</button></li>
-        <li><button class="text-error" hx-delete="/wardrobe/{{garment.id}}" hx-confirm="{{t 'lang.CONFIRM_DELETE'}}" hx-indicator="#loading">{{t 'lang.DELETE'}}</button></li>
+      <ul
+        class="menu dropdown-content z-30 mt-2 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
+      >
+        {{#if canClone}}
+        <li>
+          <a
+            href="/wardrobe/{{garment.id}}/clone{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
+            >{{t 'lang.CLONE_GARMENT'}}</a
+          >
+        </li>
+        {{/if}} {{#if canDelete}}
+        <li>
+          <button
+            hx-post="/wardrobe/{{garment.id}}/archive"
+            hx-confirm="{{#if garment.archived}}{{t 'lang.CONFIRM_UNARCHIVE'}}{{else}}{{t 'lang.CONFIRM_ARCHIVE'}}{{/if}}"
+            hx-indicator="#loading"
+          >
+            {{#if garment.archived}}{{t 'lang.UNARCHIVE'}}{{else}}{{t
+            'lang.ARCHIVE'}}{{/if}}
+          </button>
+        </li>
+        <li>
+          <button
+            class="text-error"
+            hx-delete="/wardrobe/{{garment.id}}"
+            hx-confirm="{{t 'lang.CONFIRM_DELETE'}}"
+            hx-indicator="#loading"
+          >
+            {{t 'lang.DELETE'}}
+          </button>
+        </li>
         {{/if}}
       </ul>
     </details>
@@ -57,7 +136,9 @@
   </header>
 
   {{#if garment.photo}}
-  <figure class="relative mb-5 aspect-square w-full max-w-md mx-auto overflow-hidden rounded-box border border-base-300 bg-base-200 p-3 shadow-sm">
+  <figure
+    class="relative mb-5 aspect-square w-full max-w-md mx-auto overflow-hidden rounded-box border border-base-300 bg-base-200 p-3 shadow-sm"
+  >
     <img
       src="/file/nobg/{{garment.photo.fileName}}"
       alt="{{garment.name}}"
@@ -91,93 +172,146 @@
     </button>
   </figure>
   {{else}}
-  <div class="card card-border mb-5 aspect-square w-full max-w-md mx-auto bg-base-200">
-    <div class="card-body flex items-center justify-center text-base-content/30">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1"
-      stroke="currentColor"
-      class="size-20"
+  <div
+    class="card card-border mb-5 aspect-square w-full max-w-md mx-auto bg-base-200"
+  >
+    <div
+      class="card-body flex items-center justify-center text-base-content/30"
     >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.251 2.251 0 0 1 2.012 1.244l.256.512a2.251 2.251 0 0 0 2.013 1.244h3.218a2.251 2.251 0 0 0 2.013-1.244l.256-.512a2.251 2.251 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3"
-      />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1"
+        stroke="currentColor"
+        class="size-20"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.251 2.251 0 0 1 2.012 1.244l.256.512a2.251 2.251 0 0 0 2.013 1.244h3.218a2.251 2.251 0 0 0 2.013-1.244l.256-.512a2.251 2.251 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3"
+        />
+      </svg>
     </div>
   </div>
   {{/if}} {{#if canEdit}} {{!-- Photo upload --}}
-  <details class="collapse collapse-arrow mb-5 border border-base-300 bg-base-100">
-    <summary class="collapse-title min-h-0 py-4 text-sm font-semibold">Photo &amp; cleanup</summary>
-    <div class="collapse-content">
-  <form
-    id="photoUploadForm"
-    hx-post="/wardrobe/{{garment.id}}/photo{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
-    hx-encoding="multipart/form-data"
-    hx-indicator="#photoSavingSpinner"
-    hx-target="main"
-    hx-select="main"
-    hx-swap="outerHTML"
-    class="flex flex-col gap-4 pt-1"
+  <details
+    class="collapse collapse-arrow mb-5 border border-base-300 bg-base-100"
   >
-    <input
-      type="file"
-      id="nobgPhotoInput"
-      name="nobgPhoto"
-      class="hidden"
-      accept="image/webp"
-    />
-    <fieldset class="fieldset gap-2">
-      <legend class="fieldset-legend">Choose a new photo</legend>
-      <input
-        type="file"
-        id="photoInput"
-        name="photo"
-        class="file-input file-input-sm w-full"
-        accept="image/jpeg,image/png,image/gif,image/webp"
-        aria-label="Choose a replacement garment photo"
-      />
-      <p class="label">Use a clear, well-lit image for the best result.</p>
-    </fieldset>
-    <div id="photoEditingActions" class="hidden grid grid-cols-2 gap-2">
-      <button id="editNewPhoto" type="button" class="btn btn-outline btn-sm w-full text-xs">
-        <span class="loading loading-spinner loading-xs hidden" aria-hidden="true"></span>
-        <span class="button-label">Remove &amp; refine background</span>
-      </button>
-      <button id="frameNewPhoto" type="button" class="btn btn-outline btn-sm w-full">Adjust framing</button>
-    </div>
-    <p id="photoEditStatus" class="hidden text-sm text-base-content/65" role="status" aria-live="polite"></p>
-    <div id="photoPreview" class="hidden card card-side card-border overflow-hidden bg-base-200">
-      <figure class="w-24 shrink-0 bg-base-100 p-2">
-        <img id="photoPreviewImage" class="aspect-square h-full w-full object-contain" alt="{{garment.name}}" />
-      </figure>
-      <div class="card-body min-w-0 gap-1 p-3">
-        <p class="text-sm font-semibold">New photo selected</p>
-        <p class="text-sm text-base-content/60">Review the result, then update this garment.</p>
-      </div>
-    </div>
-    <div
-      id="photoUploadStatus"
-      class="hidden flex items-center gap-2 text-sm text-base-content/65"
-      role="status"
-      aria-live="polite"
-      data-ready-text="{{t 'lang.PHOTO_READY_TO_SAVE'}}"
-      data-saving-text="{{t 'lang.PHOTO_SAVING'}}"
-      data-saved-text="{{t 'lang.PHOTO_SAVED'}}"
-      data-failed-text="{{t 'lang.PHOTO_UPLOAD_FAILED'}}"
-    >
-      <span id="photoUploadStatusDot" class="status status-info status-sm"></span>
-      <span id="photoUploadStatusText"></span>
-      <button id="photoUploadRetry" type="button" class="btn btn-link btn-sm hidden">{{t 'lang.PHOTO_RETRY'}}</button>
-    </div>
-    <button id="photoBtn" type="submit" class="btn btn-primary w-full" disabled>
-      {{#if garment.photo}}{{t 'lang.UPDATE_PHOTO'}}{{else}}{{t 'lang.ADD_PHOTO'}}{{/if}}
-      <span id="photoSavingSpinner" class="htmx-indicator loading loading-spinner loading-xs"></span>
-    </button>
-  </form>
+    <summary class="collapse-title min-h-0 py-4 text-sm font-semibold">
+      Photo &amp; cleanup
+    </summary>
+    <div class="collapse-content">
+      <form
+        id="photoUploadForm"
+        hx-post="/wardrobe/{{garment.id}}/photo{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}"
+        hx-encoding="multipart/form-data"
+        hx-indicator="#photoSavingSpinner"
+        hx-target="main"
+        hx-select="main"
+        hx-swap="outerHTML"
+        class="flex flex-col gap-4 pt-1"
+      >
+        <input
+          type="file"
+          id="nobgPhotoInput"
+          name="nobgPhoto"
+          class="hidden"
+          accept="image/webp"
+        />
+        <fieldset class="fieldset gap-2">
+          <legend class="fieldset-legend">Choose a new photo</legend>
+          <input
+            type="file"
+            id="photoInput"
+            name="photo"
+            class="file-input file-input-sm w-full"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            aria-label="Choose a replacement garment photo"
+          />
+          <p class="label">Use a clear, well-lit image for the best result.</p>
+        </fieldset>
+        <div id="photoEditingActions" class="hidden grid grid-cols-2 gap-2">
+          <button
+            id="editNewPhoto"
+            type="button"
+            class="btn btn-outline btn-sm w-full text-xs"
+          >
+            <span
+              class="loading loading-spinner loading-xs hidden"
+              aria-hidden="true"
+            ></span>
+            <span class="button-label">Remove &amp; refine background</span>
+          </button>
+          <button
+            id="frameNewPhoto"
+            type="button"
+            class="btn btn-outline btn-sm w-full"
+          >
+            Adjust framing
+          </button>
+        </div>
+        <p
+          id="photoEditStatus"
+          class="hidden text-sm text-base-content/65"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <div
+          id="photoPreview"
+          class="hidden card card-side card-border overflow-hidden bg-base-200"
+        >
+          <figure class="w-24 shrink-0 bg-base-100 p-2">
+            <img
+              id="photoPreviewImage"
+              class="aspect-square h-full w-full object-contain"
+              alt="{{garment.name}}"
+            />
+          </figure>
+          <div class="card-body min-w-0 gap-1 p-3">
+            <p class="text-sm font-semibold">New photo selected</p>
+            <p class="text-sm text-base-content/60">
+              Review the result, then update this garment.
+            </p>
+          </div>
+        </div>
+        <div
+          id="photoUploadStatus"
+          class="hidden flex items-center gap-2 text-sm text-base-content/65"
+          role="status"
+          aria-live="polite"
+          data-ready-text="{{t 'lang.PHOTO_READY_TO_SAVE'}}"
+          data-saving-text="{{t 'lang.PHOTO_SAVING'}}"
+          data-saved-text="{{t 'lang.PHOTO_SAVED'}}"
+          data-failed-text="{{t 'lang.PHOTO_UPLOAD_FAILED'}}"
+        >
+          <span
+            id="photoUploadStatusDot"
+            class="status status-info status-sm"
+          ></span>
+          <span id="photoUploadStatusText"></span>
+          <button
+            id="photoUploadRetry"
+            type="button"
+            class="btn btn-link btn-sm hidden"
+          >
+            {{t 'lang.PHOTO_RETRY'}}
+          </button>
+        </div>
+        <button
+          id="photoBtn"
+          type="submit"
+          class="btn btn-primary w-full"
+          disabled
+        >
+          {{#if garment.photo}}{{t 'lang.UPDATE_PHOTO'}}{{else}}{{t
+          'lang.ADD_PHOTO'}}{{/if}}
+          <span
+            id="photoSavingSpinner"
+            class="htmx-indicator loading loading-spinner loading-xs"
+          ></span>
+        </button>
+      </form>
     </div>
   </details>
   <script type="module">
@@ -279,32 +413,57 @@
         <span class="badge badge-soft capitalize">{{categoryLabel}}</span>
       </div>
       <ul class="list -mx-2">
-      {{#if garment.brand}}
-      <li class="list-row px-2 py-2"><span class="text-sm text-base-content/60">{{t 'lang.BRAND'}}</span><span class="text-right font-medium">{{garment.brand}}</span></li>
-      {{/if}} {{#if garment.size}}
-      <li class="list-row px-2 py-2"><span class="text-sm text-base-content/60">{{t 'lang.SIZE'}}</span><span class="text-right font-medium">{{garment.size}}</span></li>
-      {{/if}}       {{#if garment.color}}
-      <li class="list-row px-2 py-2"><span class="text-sm text-base-content/60">{{t 'lang.COLOR'}}</span><span class="text-right font-medium capitalize">{{formatColors garment.color}}</span></li>
-      {{/if}} {{#if garment.dateAquired}}
-      <li class="list-row px-2 py-2"><span class="text-sm text-base-content/60">{{t 'lang.DATE_AQUIRED'}}</span><span class="text-right font-medium">{{formatDate garment.dateAquired}}</span></li>
-      {{/if}}
+        {{#if garment.brand}}
+        <li class="list-row px-2 py-2">
+          <span class="text-sm text-base-content/60">{{t 'lang.BRAND'}}</span
+          ><span class="text-right font-medium">{{garment.brand}}</span>
+        </li>
+        {{/if}} {{#if garment.size}}
+        <li class="list-row px-2 py-2">
+          <span class="text-sm text-base-content/60">{{t 'lang.SIZE'}}</span
+          ><span class="text-right font-medium">{{garment.size}}</span>
+        </li>
+        {{/if}} {{#if garment.color}}
+        <li class="list-row px-2 py-2">
+          <span class="text-sm text-base-content/60">{{t 'lang.COLOR'}}</span
+          ><span class="text-right font-medium capitalize"
+            >{{formatColors garment.color}}</span
+          >
+        </li>
+        {{/if}} {{#if garment.dateAquired}}
+        <li class="list-row px-2 py-2">
+          <span class="text-sm text-base-content/60"
+            >{{t 'lang.DATE_AQUIRED'}}</span
+          ><span class="text-right font-medium"
+            >{{formatDate garment.dateAquired}}</span
+          >
+        </li>
+        {{/if}}
       </ul>
       {{#if garment.washingDetails}}
       <div class="rounded-box bg-base-200 p-3">
-        <p class="text-xs font-semibold uppercase tracking-wider text-base-content/55">{{t 'lang.WASHING_DETAILS'}}</p>
-        <p class="mt-1 break-words text-sm leading-6">{{garment.washingDetails}}</p>
+        <p
+          class="text-xs font-semibold uppercase tracking-wider text-base-content/55"
+        >
+          {{t 'lang.WASHING_DETAILS'}}
+        </p>
+        <p class="mt-1 break-words text-sm leading-6">
+          {{garment.washingDetails}}
+        </p>
       </div>
-      {{/if}}
-      {{#if garment.notes}}
+      {{/if}} {{#if garment.notes}}
       <div class="border-t border-base-300 pt-4">
-        <p class="text-xs font-semibold uppercase tracking-wider text-base-content/55">{{t 'lang.NOTES'}}</p>
+        <p
+          class="text-xs font-semibold uppercase tracking-wider text-base-content/55"
+        >
+          {{t 'lang.NOTES'}}
+        </p>
         <p class="mt-1 break-words text-sm leading-6">{{garment.notes}}</p>
       </div>
       {{/if}}
     </div>
   </section>
-  {{!-- Share --}}
-  {{#if canEdit}}
+  {{!-- Share --}} {{#if canEdit}}
   <div class="hidden">
     <button
       class="btn btn-outline btn-sm flex-1"
@@ -327,22 +486,17 @@
       {{t 'lang.SHARE'}}
     </button>
   </div>
-  {{/if}}
-
-  {{!-- Archive --}}
-  {{#if canDelete}}
+  {{/if}} {{!-- Archive --}} {{#if canDelete}}
   <button
     class="btn btn-outline btn-sm hidden"
     hx-post="/wardrobe/{{garment.id}}/archive"
     hx-confirm="{{#if garment.archived}}{{t 'lang.CONFIRM_UNARCHIVE'}}{{else}}{{t 'lang.CONFIRM_ARCHIVE'}}{{/if}}"
     hx-indicator="#loading"
   >
-    {{#if garment.archived}}{{t 'lang.UNARCHIVE'}}{{else}}{{t 'lang.ARCHIVE'}}{{/if}}
+    {{#if garment.archived}}{{t 'lang.UNARCHIVE'}}{{else}}{{t
+    'lang.ARCHIVE'}}{{/if}}
   </button>
-  {{/if}}
-
-  {{!-- Delete --}}
-  {{#if canDelete}}
+  {{/if}} {{!-- Delete --}} {{#if canDelete}}
   <button
     class="btn btn-error btn-outline btn-sm hidden"
     hx-delete="/wardrobe/{{garment.id}}"
