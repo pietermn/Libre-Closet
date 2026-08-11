@@ -38,6 +38,18 @@ import { AiModule } from './ai/ai.module';
         };
         return {
           pinoHttp: {
+            redact: {
+              paths: [
+                'req.headers.authorization',
+                'req.headers.cookie',
+                'req.body.password',
+                'req.body.oldPassword',
+                'req.body.newPassword',
+                'req.body.resetCode',
+                'req.body.token',
+              ],
+              censor: '[REDACTED]',
+            },
             transport: {
               targets: [
                 {
@@ -75,7 +87,11 @@ import { AiModule } from './ai/ai.module';
         AUTH_ENABLED: Joi.boolean().default(false),
         DISABLE_REGISTRATION: Joi.boolean().default(false),
         PWA_ENABLED: Joi.boolean().default(false),
-        ACCESS_TOKEN_SECRET: Joi.string().default('ChangeMe!'),
+        ACCESS_TOKEN_SECRET: Joi.string().when('AUTH_ENABLED', {
+          is: true,
+          then: Joi.string().min(32).invalid('ChangeMe!').required(),
+          otherwise: Joi.string().default('development-auth-disabled-secret'),
+        }),
         PUBLIC_VAPID_KEY: Joi.optional().default(
           'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U',
         ),

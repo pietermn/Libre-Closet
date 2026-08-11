@@ -19,7 +19,7 @@ import { ViewContextModule } from '../view-context/view-context.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('ACCESS_TOKEN_SECRET'),
-        signOptions: { expiresIn: '365d' },
+        signOptions: { expiresIn: '12h' },
       }),
     }),
     MikroOrmModule.forFeature([PasswordReset, User]),

@@ -50,7 +50,7 @@ https://daisyui.com/components/drawer/#navbar-menu-for-desktop--sidebar-drawer-f
         <ul class="menu menu-horizontal">
           <!-- Navbar menu content here -->
           {{#if authEnabled}} {{#if user}}
-          <li><a href="/auth/logout">{{t 'lang.LOGOUT'}}</a></li>
+          <li><form method="post" action="/auth/logout"><button type="submit">{{t 'lang.LOGOUT'}}</button></form></li>
           <li><a href="/auth/profile">{{user.email}}</a></li>
           {{else}}
           {{#unless signupsDisabled}}<li><a href="/auth/register">{{t 'lang.REGISTER'}}</a></li>{{/unless}}
@@ -69,7 +69,7 @@ https://daisyui.com/components/drawer/#navbar-menu-for-desktop--sidebar-drawer-f
     <ul class="menu bg-base-200 min-h-full w-80 p-4 pt-8">
       <!-- Sidebar content here -->
       {{#if authEnabled}} {{#if user}}
-      <li><a href="/auth/logout">{{t 'lang.LOGOUT'}}</a></li>
+      <li><form method="post" action="/auth/logout"><button type="submit">{{t 'lang.LOGOUT'}}</button></form></li>
       <li><a href="/auth/profile">{{user.email}}</a></li>
       {{else}}
       {{#unless signupsDisabled}}<li><a href="/auth/register">{{t 'lang.REGISTER'}}</a></li>{{/unless}}

@@ -14,7 +14,7 @@ import { ChangePasswordDto } from './dto/changePassword.dto';
 import { Payload } from './dto/payload.dto';
 import { EmailService } from '../email/email.service';
 import { PasswordReset } from '../dal/entity/passwordReset.entity';
-import { randomInt } from 'crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'crypto';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import Handlebars from 'handlebars';
 import { readFileSync } from 'fs';
@@ -43,10 +43,8 @@ export class AuthService {
   }
 
   async register(email: string, password: string): Promise<string> {
-    this.logger.debug(this.register.name);
     const existingUser = await this.userRepository.findOne({ email });
     if (existingUser) {
-      this.logger.debug(`User already exists with email address: ${email}`);
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
 
@@ -88,7 +86,6 @@ export class AuthService {
   }
 
   public async changePassword(userId: any, details: ChangePasswordDto) {
-    this.logger.debug(this.changePassword.name);
     const user = await this.userRepository.findOneOrFail({ id: userId });
 
     if (await bcrypt.compare(details.oldPassword, user.password)) {
@@ -109,33 +106,53 @@ export class AuthService {
     await this.em.removeAndFlush(user);
   }
 
-  public async resetPassword(details: ResetPasswordDto) {
-    this.logger.debug(this.resetPassword.name);
-    const user = await this.userRepository.findOneOrFail({
-      email: details.email,
-    });
+  public async resetPassword(details: ResetPasswordDto): Promise<boolean> {
+    const user = await this.userRepository.findOne({ email: details.email });
+    if (!user) return false;
 
     const passwordReset = await user.passwordReset.load();
-
-    if (passwordReset?.pin === details.resetCode) {
-      const hashedPassword = await bcrypt.hash(details.password, 12);
-      user.password = hashedPassword;
-      await this.em.persistAndFlush(user);
+    if (!passwordReset || passwordReset.usedAt || !passwordReset.expiresAt) {
+      return false;
     }
+
+    const suppliedHash = this.hashResetCode(details.resetCode);
+    const valid =
+      passwordReset.expiresAt.getTime() > Date.now() &&
+      timingSafeEqual(
+        Buffer.from(passwordReset.pin, 'hex'),
+        Buffer.from(suppliedHash, 'hex'),
+      );
+    if (!valid) return false;
+
+    user.password = await bcrypt.hash(details.password, 12);
+    passwordReset.usedAt = new Date();
+    await this.em.persistAndFlush([user, passwordReset]);
+    return true;
   }
 
-  async sendPasswordResetEmail(email: string) {
-    this.logger.debug(this.sendPasswordResetEmail.name);
-    const user = await this.userRepository.findOneOrFail({ email });
-    const pin = randomInt(100000, 999999).toString();
+  async sendPasswordResetEmail(email: string): Promise<void> {
+    const user = await this.userRepository.findOne({ email });
+    // Deliberately succeed for unknown email addresses to avoid account enumeration.
+    if (!user?.email) return;
+
+    const pin = randomBytes(24).toString('base64url');
     await this.emailService.sendEmailFromPrimaryAddress({
-      to: user.email!,
+      to: user.email,
       subject: `Password reset for ${user.email}`,
       text: `Hello, ${user.email}, please paste in the follow to reset your password: ${pin}`,
       html: this.passwordResetTemplate({ email: user.email, pin }),
     });
 
-    const passwordReset = this.passwordResetRepository.create({ pin, user });
+    const existingReset = await user.passwordReset.load();
+    const passwordReset =
+      existingReset ?? this.passwordResetRepository.create({ user });
+    passwordReset.pin = this.hashResetCode(pin);
+    passwordReset.expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    passwordReset.usedAt = undefined;
     await this.em.persistAndFlush(passwordReset);
+  }
+
+  private hashResetCode(code: string): string {
+    return createHash('sha256').update(code).digest('hex');
   }
 }

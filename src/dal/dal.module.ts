@@ -28,7 +28,7 @@ import path from 'path';
                 pathTs: path.join(__dirname, 'migrations/sqlite'),
                 transactional: true,
               },
-              logger: (message) => console.log(message),
+              logger: false,
               allowGlobalContext: true,
               debug: configService.get('NODE_ENV') !== 'production',
             } as MikroOrmModuleOptions<IDatabaseDriver<Connection>>;
@@ -58,7 +58,7 @@ import path from 'path';
                     : undefined,
                 },
               },
-              logger: (message) => console.log(message),
+              logger: false,
               allowGlobalContext: true,
               debug: configService.get('NODE_ENV') !== 'production',
             } as MikroOrmModuleOptions<IDatabaseDriver<Connection>>;

@@ -12,7 +12,7 @@ WORKDIR /app
 # the destination must be a directory and end with a /
 COPY package*.json ./
 COPY patches ./patches
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY src ./src
 COPY views ./views
@@ -31,17 +31,19 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY patches ./patches
-RUN npm ci
+RUN npm ci --include=dev && npm prune --omit=dev && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/views ./views
 COPY --from=builder /app/public ./public
 
-COPY .env .
-
 # Set NODE_ENV to production
 ENV NODE_ENV=production
+
+RUN groupadd --system app && useradd --system --gid app --home-dir /app app \
+    && chown -R app:app /app
+USER app
 
 EXPOSE 3000
 

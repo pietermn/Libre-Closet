@@ -49,9 +49,18 @@ export class AiGarmentService {
   async analyze(upload?: MultipartFile): Promise<GarmentSuggestion> {
     const apiKey = this.config.get<string>('OPENAI_API_KEY');
     if (!apiKey) return { available: false };
-    if (!upload?.mimetype.startsWith('image/')) return { available: true };
+    if (
+      !upload ||
+      !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(
+        upload.mimetype,
+      )
+    )
+      return { available: true };
 
-    const compressed = await sharp(await upload.toBuffer())
+    const compressed = await sharp(await upload.toBuffer(), {
+      limitInputPixels: 40_000_000,
+      failOn: 'error',
+    })
       .rotate()
       .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 75 })

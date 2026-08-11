@@ -20,6 +20,7 @@ import { User } from '../../auth/user.decorator';
 import { User as UserEntity } from '../../dal/entity/user.entity';
 import { FileService } from '../file-service.abstract';
 import { ConditionalAuthGuard } from '../../auth/conditional-auth.guard';
+import { seconds, Throttle } from '@nestjs/throttler';
 
 @Controller('file')
 export class FileController {
@@ -45,6 +46,7 @@ export class FileController {
   }
 
   @UseGuards(AuthGuard)
+  @Throttle({ default: { limit: 10, ttl: seconds(60) } })
   @Post('upload')
   @Render('files')
   async uploadFile(@User() payload: Payload, @Req() req: FastifyRequest) {

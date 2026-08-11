@@ -37,13 +37,18 @@ export class S3FileService extends FileService {
     }
     // https://github.com/fastify/fastify-multipart/issues/497
     // Unconsumed multipart streams can hang the request; drain before throwing
-    if (!upload.mimetype?.startsWith('image/')) {
+    if (
+      !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(
+        upload.mimetype,
+      )
+    ) {
       upload.file.resume();
       throw new HttpException('Wrong filetype', HttpStatus.BAD_REQUEST);
     }
 
     const storedFileName = fileName ?? randomUUID() + '.webp';
-    const transformer = sharp()
+    // Decode actual image bytes; do not trust the multipart Content-Type.
+    const transformer = sharp({ limitInputPixels: 40_000_000, failOn: 'error' })
       .autoOrient()
       .webp({ quality: 100 })
       .resize(1080, 1080, { fit: sharp.fit.inside });

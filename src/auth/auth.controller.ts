@@ -5,7 +5,6 @@ import {
   Logger,
   Post,
   Query,
-  Redirect,
   Render,
   Res,
   UseGuards,
@@ -52,8 +51,7 @@ export class AuthController {
     const jwt = await this.authService.register(body.email, body.password);
     reply.setCookie('access_token', jwt, {
       path: '/',
-      maxAge: 365 * 24 * 60 * 60 * 1000, // 365 days
-      httpOnly: true, // Prevents client-side JS from reading it
+      ...this.cookieOptions(),
     });
     return reply.redirect('/auth/profile', 302);
   }
@@ -87,12 +85,11 @@ export class AuthController {
       );
       reply.setCookie('access_token', jwt, {
         path: '/',
-        maxAge: 365 * 24 * 60 * 60 * 1000, // 365 days
-        httpOnly: true, // Prevents client-side JS from reading it
+        ...this.cookieOptions(),
       });
       reply.redirect('/auth/profile', 302);
     } catch (error) {
-      this.logger.warn(error);
+      this.logger.warn('Failed login attempt');
       return reply.view('auth/login', {
         layout: 'layout',
         error,
@@ -101,13 +98,13 @@ export class AuthController {
     }
   }
 
-  @Redirect('/')
-  @Get('logout')
-  getLogout(
+  @Post('logout')
+  logout(
     // https://docs.nestjs.com/techniques/cookies#use-with-express-default
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
-    reply.clearCookie('access_token', { path: '/' });
+    reply.clearCookie('access_token', this.cookieOptions());
+    return reply.redirect('/', 302);
   }
 
   @Get('login')
@@ -129,13 +126,17 @@ export class AuthController {
     };
   }
 
+  @Throttle({ default: { limit: 3, ttl: minutes(15) } })
   @Post('reset')
   async postReset(@Body() emailDto: EmailDto, @Res() reply: FastifyReply) {
     try {
       await this.authService.sendPasswordResetEmail(emailDto.email);
-      return reply.redirect(`/auth/reset-code?email=${emailDto.email}`, 302);
+      return reply.redirect(
+        `/auth/reset-code?email=${encodeURIComponent(emailDto.email)}`,
+        302,
+      );
     } catch (error) {
-      this.logger.warn(error);
+      this.logger.warn('Password reset email delivery failed');
       return reply.view('auth/reset', {
         layout: 'layout',
         error,
@@ -161,7 +162,6 @@ export class AuthController {
     @I18n() i18n: I18nContext,
     @Body() body: ResetPasswordDto,
   ) {
-    console.log(body);
     const instance = plainToInstance(ResetPasswordDto, body);
     const validationErrors = await i18n.validate(instance);
     if (validationErrors.length) {
@@ -174,6 +174,7 @@ export class AuthController {
     return { input: body };
   }
 
+  @Throttle({ default: { limit: 5, ttl: minutes(10) } })
   @Post('reset-code')
   async postResetCode(
     @I18n() i18n: I18nContext,
@@ -191,7 +192,15 @@ export class AuthController {
       });
     }
 
-    await this.authService.resetPassword(body);
+    const reset = await this.authService.resetPassword(body);
+    if (!reset) {
+      return reply.view('auth/reset-code', {
+        layout: 'layout',
+        input: { email: body.email },
+        error: 'Invalid or expired reset code',
+        ...((reply as any).locals ?? {}),
+      });
+    }
     return reply.redirect('/auth/login', 302);
   }
 
@@ -225,10 +234,10 @@ export class AuthController {
     try {
       await this.authService.signIn(loginDto.email, loginDto.password);
       await this.authService.deleteUser(payload.userId);
-      reply.clearCookie('access_token', { path: '/' });
+      reply.clearCookie('access_token', this.cookieOptions());
       return reply.redirect('/', 302);
     } catch (error) {
-      this.logger.warn(error);
+      this.logger.warn('Account deletion authentication failed');
       return reply.view('auth/delete-account', {
         layout: 'layout',
         error,
@@ -281,5 +290,15 @@ export class AuthController {
 
     await this.authService.changeEmail(payload.userId, body.confirmEmail);
     return reply.redirect('/auth/profile', 302);
+  }
+
+  private cookieOptions() {
+    return {
+      path: '/',
+      maxAge: 12 * 60 * 60,
+      httpOnly: true,
+      sameSite: 'lax' as const,
+      secure: process.env.NODE_ENV === 'production',
+    };
   }
 }
