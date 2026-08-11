@@ -12,7 +12,7 @@ import { Garment } from '../dal/entity/garment.entity';
 import { File } from '../dal/entity/file.entity';
 import { User } from '../dal/entity/user.entity';
 import { FileService } from '../file/file-service.abstract';
-import { MultipartFile } from '@fastify/multipart';
+import { Multipart, MultipartFile } from '@fastify/multipart';
 import { CreateGarmentDto } from './dto/create-garment.dto';
 import { UpdateGarmentDto } from './dto/update-garment.dto';
 import { SearchGarmentDto } from './dto/search-garment.dto';
@@ -138,11 +138,56 @@ export class GarmentService {
       }
     }
 
+    return this.persistNewGarment(dto, photo, userId);
+  }
+
+  async createFromMultipart(
+    parts: AsyncIterableIterator<Multipart>,
+    userId?: number,
+  ): Promise<{ garment: Garment; saveAction?: string }> {
+    const fields = new Map<string, string[]>();
+    let photoPromise: Promise<File> | undefined;
+
+    for await (const part of parts) {
+      if (part.type === 'field') {
+        const values = fields.get(part.fieldname) ?? [];
+        values.push(String(part.value));
+        fields.set(part.fieldname, values);
+      } else if (part.fieldname === 'photo') {
+        photoPromise = this.fileService.storeImageFromFileUpload(part, userId);
+      } else {
+        part.file.resume();
+      }
+    }
+
+    const photo = photoPromise ? await photoPromise : undefined;
+    const garment = await this.persistNewGarment(
+      {
+        name: fields.get('name')?.[0],
+        category: fields.get('category')?.[0] ?? '',
+        brand: fields.get('brand')?.[0],
+        color: fields.get('color')?.join(','),
+        size: fields.get('size')?.[0],
+        notes: fields.get('notes')?.[0],
+        washingDetails: fields.get('washingDetails')?.[0],
+        dateAquired: fields.get('dateAquired')?.[0],
+      },
+      photo,
+      userId,
+    );
+    return { garment, saveAction: fields.get('saveAction')?.[0] };
+  }
+
+  private async persistNewGarment(
+    dto: CreateGarmentDto,
+    photo: File | undefined,
+    userId?: number,
+  ): Promise<Garment> {
     const garment = this.garmentRepository.create({
       name: dto.name,
       category: dto.category,
       brand: dto.brand,
-      color: dto.color,
+      color: dto.color as any,
       size: this.normalizeSize(dto.size),
       notes: dto.notes,
       washingDetails: dto.washingDetails,

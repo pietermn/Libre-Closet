@@ -21,6 +21,7 @@ import { Payload } from '../auth/dto/payload.dto';
 import { GarmentCategory } from './garment-category.enum';
 import { GarmentColor } from './garment-color.enum';
 import { GarmentService } from './garment.service';
+import { Garment } from '../dal/entity/garment.entity';
 import { WardrobeShareService } from '../wardrobe-share/wardrobe-share.service';
 import { SharePermission } from '../dal/entity/wardrobe-share.entity';
 import type { SearchGarmentDto } from './dto/search-garment.dto';
@@ -155,29 +156,42 @@ export class WardrobeController {
       if (!canManage) throw new ForbiddenException();
     }
 
-    // Fastify gives string if one checkbox, string[] if multiple — normalise both
-    const rawColors = Array.isArray(body.color)
-      ? body.color
-      : (body.color
-          ?.split(',')
-          .map((c) => c.trim())
-          .filter(Boolean) ?? []);
-
-    const garment = await this.garmentService.create(
-      {
-        name: body.name,
-        category: body.category,
-        brand: body.brand,
-        color: rawColors.join(','),
-        size: body.size,
-        notes: body.notes,
-        washingDetails: body.washingDetails,
-        dateAquired: body.dateAquired,
-      },
-      viewOwner ?? userId,
-    );
+    let garment: Garment;
+    let saveAction: string | undefined;
+    if (req.isMultipart()) {
+      const created = await this.garmentService.createFromMultipart(
+        req.parts({ limits: { files: 1 } }),
+        viewOwner ?? userId,
+      );
+      garment = created.garment;
+      saveAction = created.saveAction;
+    } else {
+      garment = await this.garmentService.create(
+        {
+          name: body.name,
+          category: body.category,
+          brand: body.brand,
+          color: (Array.isArray(body.color)
+            ? body.color
+            : body.color?.split(',')
+          )
+            ?.map((color) => color.trim())
+            .filter(Boolean)
+            .join(','),
+          size: body.size,
+          notes: body.notes,
+          washingDetails: body.washingDetails,
+          dateAquired: body.dateAquired,
+        },
+        viewOwner ?? userId,
+      );
+      saveAction = (body as { saveAction?: string }).saveAction;
+    }
 
     const redirectSuffix = viewOwner ? `?ownerId=${viewOwner}` : '';
+    if (saveAction === 'continue') {
+      return reply.redirect(`/wardrobe/new${redirectSuffix}`, 302);
+    }
     return reply.redirect(`/wardrobe/${garment.id}${redirectSuffix}`, 302);
   }
 

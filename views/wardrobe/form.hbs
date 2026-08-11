@@ -1,7 +1,7 @@
 {{>navbar}}
 
-<main class="p-4 pt-20 pb-24 max-w-lg mx-auto">
-  <div class="flex items-center gap-3 mb-6">
+<main class="p-4 pt-20 pb-24 max-w-xl mx-auto">
+  <div class="flex items-center gap-3 mb-5">
     <a
       href="{{#if garment}}/wardrobe/{{garment.id}}{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{else}}/wardrobe{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{/if}}"
       class="btn btn-ghost btn-sm btn-circle"
@@ -26,33 +26,75 @@
     </h1>
   </div>
 
-  <form
-    method="POST"
-    action="{{#if isClone}}/wardrobe/{{garment.id}}/clone{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{else if garment}}/wardrobe/{{garment.id}}{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{else}}/wardrobe{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{/if}}"
-    class="flex flex-col gap-4"
-  >
-    <div class="form-control">
-      <label class="label"
-        ><span class="label-text">{{t 'lang.NAME'}}</span></label
-      >
-      <input
-        type="text"
-        name="name"
-        class="input input-bordered"
-        value="{{#if isClone}}{{cloneName}}{{else if garment}}{{garment.name}}{{/if}}"
-        placeholder="e.g. Black Linen Blazer"
-      />
-    </div>
+  {{#unless garment}}
+  <div role="tablist" class="tabs tabs-box grid grid-cols-2 mb-6 w-full">
+    <button id="wizardStepPhoto" type="button" role="tab" aria-selected="true" class="tab tab-active w-full font-semibold">1 · Photo</button>
+    <button id="wizardStepDetails" type="button" role="tab" aria-selected="false" class="tab w-full font-semibold">2 · Details</button>
+  </div>
+  {{/unless}}
 
-    <div class="form-control">
-      <label class="label"
-        ><span class="label-text">{{t 'lang.CATEGORY'}} *</span></label
-      >
+  <form
+    id="garmentForm"
+    method="POST"
+    {{#unless garment}}enctype="multipart/form-data"{{/unless}}
+    action="{{#if isClone}}/wardrobe/{{garment.id}}/clone{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{else if garment}}/wardrobe/{{garment.id}}{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{else}}/wardrobe{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{/if}}"
+    class="flex flex-col gap-5"
+  >
+    {{#unless garment}}
+    {{#unless isClone}}
+    <div id="capturePanel" class="card card-border bg-base-100 shadow-sm">
+      <div class="card-body p-5">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{t 'lang.ADD_PHOTO'}}</legend>
+        <p class="label mb-3">Choose one clear photo. We’ll help you refine it before saving.</p>
+      <input
+        type="file"
+        id="newGarmentPhoto"
+        name="photo"
+        class="file-input file-input-bordered w-full"
+        accept="image/jpeg,image/png,image/gif,image/webp"
+      />
+      <div id="newGarmentPreview" class="hidden mt-4 overflow-hidden rounded-box border border-base-300 bg-base-200">
+        <img id="newGarmentPreviewImage" class="aspect-square w-full object-contain" alt="Selected garment photo preview" />
+        <p id="newGarmentPreviewCaption" class="px-3 py-2 text-sm text-base-content/60">Photo ready to save</p>
+      </div>
+      <p class="text-sm text-base-content/60 mt-2">{{t 'lang.PHOTO_SAVE_WITH_GARMENT'}}</p>
+      <p id="analysisStatus" class="hidden mt-3 text-sm text-base-content/60" aria-live="polite"></p>
+      <p id="photoEditStatus" class="hidden mt-3 text-sm text-primary" role="status" aria-live="polite"></p>
+      <div class="mt-3 grid w-full grid-cols-2 gap-2 hidden" id="photoEditingActions">
+        <button id="editNewPhoto" type="button" class="btn btn-outline btn-sm w-full text-xs">
+          <span class="loading loading-spinner loading-xs hidden" aria-hidden="true"></span>
+          <span class="button-label">Remove &amp; refine background</span>
+        </button>
+        <button id="frameNewPhoto" type="button" class="btn btn-outline btn-sm w-full">Adjust framing</button>
+      </div>
+      <button id="captureContinue" type="button" class="btn btn-primary mt-5 w-full">Continue to details</button>
+      </fieldset>
+      </div>
+    </div>
+    {{/unless}}
+    {{/unless}}
+
+    <section id="detailsPanel" {{#unless garment}}data-wizard-detail{{/unless}} class="card card-border bg-base-100 shadow-sm">
+      <div class="card-body p-5">
+      {{#unless garment}}
+      <div class="mb-5">
+        <p class="font-semibold">Review the details</p>
+        <p class="mt-1 text-sm text-base-content/60">AI suggestions are a starting point—adjust anything before saving.</p>
+      </div>
+      {{/unless}}
+      <fieldset class="fieldset gap-1">
+        <legend class="fieldset-legend">{{t 'lang.NAME'}}</legend>
+        <input type="text" name="name" class="input input-bordered w-full" value="{{#if isClone}}{{cloneName}}{{else if garment}}{{garment.name}}{{/if}}" placeholder="e.g. Black Linen Blazer" />
+      </fieldset>
+
+    <fieldset class="fieldset gap-1 mt-4">
+      <legend class="fieldset-legend">{{t 'lang.CATEGORY'}} *</legend>
       <input
         type="text"
         name="category"
         list="category-suggestions"
-        class="input input-bordered w-full"
+        class="input input-bordered w-full capitalize"
         value="{{#if garment}}{{garment.category}}{{/if}}"
         required
         placeholder="{{t 'lang.TYPE_OR_SELECT_CATEGORY'}}"
@@ -63,79 +105,211 @@
         <option value="{{this.value}}"></option>
         {{/each}}
       </datalist>
-    </div>
+    </fieldset>
 
-    <div class="form-control">
-      <label class="label"
-        ><span class="label-text">{{t 'lang.BRAND'}}</span></label
-      >
+    <fieldset class="fieldset gap-1 mt-4">
+      <legend class="fieldset-legend">{{t 'lang.BRAND'}}</legend>
       <input
         type="text"
         name="brand"
-        class="input input-bordered"
+        class="input input-bordered w-full"
         value="{{#if garment}}{{garment.brand}}{{/if}}"
         placeholder="e.g. Levi's"
       />
+    </fieldset>
+
+    <div class="mt-4">
+      {{> colorMultiSelect colors=colors garment=garment}}
     </div>
 
-    {{> colorMultiSelect colors=colors garment=garment}}
-
-    <div class="form-control">
-      <label class="label"
-        ><span class="label-text">{{t 'lang.SIZE'}}</span></label
-      >
+    <fieldset class="fieldset gap-1 mt-4">
+      <legend class="fieldset-legend">{{t 'lang.SIZE'}}</legend>
       <input
         type="text"
         name="size"
-        class="input input-bordered"
+        class="input input-bordered w-full"
         value="{{#if garment}}{{garment.size}}{{/if}}"
         placeholder="M, 32, One Size…"
       />
-    </div>
+    </fieldset>
 
-    <div class="form-control">
-      <label class="label"><span class="label-text">{{t 'lang.WASHING_DETAILS'}}</span></label>
+    <fieldset class="fieldset gap-1 mt-4">
+      <legend class="fieldset-legend">{{t 'lang.WASHING_DETAILS'}}</legend>
       <textarea
         name="washingDetails"
-        class="textarea textarea-bordered"
+        class="textarea textarea-bordered w-full"
         rows="3"
         placeholder="Wash at 30°C, do not tumble dry, do not iron…"
       >{{#if garment}}{{garment.washingDetails}}{{/if}}</textarea>
-    </div>
+    </fieldset>
 
-    <div class="form-control">
-      <label class="label"><span class="label-text">{{t 'lang.DATE_AQUIRED'}}</span></label>
+    <fieldset class="fieldset gap-1 mt-4">
+      <legend class="fieldset-legend">{{t 'lang.DATE_AQUIRED'}}</legend>
       <input
         type="date"
         name="dateAquired"
-        class="input input-bordered"
+        class="input input-bordered w-full"
         value="{{formatDate garment.dateAquired}}"
       />
-    </div>
+    </fieldset>
 
-    <div class="form-control">
-      <label class="label"><span class="label-text">{{t 'lang.NOTES'}}</span></label>
+    <fieldset class="fieldset gap-1 mt-4">
+      <legend class="fieldset-legend">{{t 'lang.NOTES'}}</legend>
       <textarea
         name="notes"
-        class="textarea textarea-bordered"
+        class="textarea textarea-bordered w-full"
         rows="3"
         placeholder="Any notes about this garment…"
       >
 {{#if garment}}{{garment.notes}}{{/if}}</textarea
       >
-    </div>
+    </fieldset>
 
-    <div class="flex gap-2 mt-2">
+    <div class="mt-6 grid grid-cols-2 gap-3">
       <a
         href="{{#if garment}}/wardrobe/{{garment.id}}{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{else}}/wardrobe{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{/if}}"
-        class="btn btn-ghost flex-1"
+        class="btn btn-ghost"
         >{{t 'lang.CANCEL'}}</a
       >
-      <button type="submit" class="btn btn-primary flex-1">
-        {{t 'lang.SAVE'}}
-      </button>
+      <button type="submit" class="btn btn-primary" name="saveAction" value="wardrobe">Save garment</button>
+      {{#unless garment}}<button type="submit" class="btn btn-outline btn-primary col-span-2" name="saveAction" value="continue">Save &amp; add another</button>{{/unless}}
     </div>
+    </div>
+    </section>
   </form>
 </main>
+
+{{#unless garment}}
+<script type="module">
+  const form = document.getElementById('garmentForm');
+  const capture = document.getElementById('capturePanel');
+  const detailElements = [...form.querySelectorAll('[data-wizard-detail]')];
+  const continueButton = document.getElementById('captureContinue');
+  const status = document.getElementById('analysisStatus');
+  const photoStep = document.getElementById('wizardStepPhoto');
+  const detailsStep = document.getElementById('wizardStepDetails');
+  const photoInput = document.getElementById('newGarmentPhoto');
+  const photoPreview = document.getElementById('newGarmentPreview');
+  const photoPreviewImage = document.getElementById('newGarmentPreviewImage');
+  const photoPreviewCaption = document.getElementById('newGarmentPreviewCaption');
+  const editPhoto = document.getElementById('editNewPhoto');
+  const framePhoto = document.getElementById('frameNewPhoto');
+  const photoEditingActions = document.getElementById('photoEditingActions');
+  const editStatus = document.getElementById('photoEditStatus');
+  let editedPhoto;
+  let previewUrl;
+
+  const previewPhoto = (file, caption = 'Photo ready to save') => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+    photoPreviewImage.src = previewUrl;
+    photoPreviewCaption.textContent = caption;
+    photoPreview.classList.remove('hidden');
+  };
+
+  const showDetails = () => {
+    capture.classList.add('hidden');
+    detailElements.forEach((element) => element.classList.remove('hidden'));
+    photoStep.className = 'tab w-full font-semibold';
+    detailsStep.className = 'tab tab-active w-full font-semibold';
+    photoStep.setAttribute('aria-selected', 'false');
+    detailsStep.setAttribute('aria-selected', 'true');
+  };
+  const showPhoto = () => {
+    capture.classList.remove('hidden');
+    detailElements.forEach((element) => element.classList.add('hidden'));
+    photoStep.className = 'tab tab-active w-full font-semibold';
+    detailsStep.className = 'tab w-full font-semibold';
+    photoStep.setAttribute('aria-selected', 'true');
+    detailsStep.setAttribute('aria-selected', 'false');
+  };
+  detailElements.forEach((element) => element.classList.add('hidden'));
+
+  photoStep.addEventListener('click', showPhoto);
+  detailsStep.addEventListener('click', showDetails);
+
+  continueButton.addEventListener('click', async () => {
+    const photo = editedPhoto || form.elements.photo.files?.[0];
+    if (!photo) return showDetails();
+    status.textContent = 'Finding garment details…';
+    status.classList.remove('hidden');
+    continueButton.disabled = true;
+    try {
+      const data = new FormData();
+      data.append('photo', photo);
+      const response = await fetch('/ai/garment-analysis', { method: 'POST', body: data });
+      const suggestion = await response.json();
+      if (suggestion.available) {
+        if (suggestion.name) form.elements.name.value = suggestion.name;
+        if (suggestion.category) form.elements.category.value = suggestion.category;
+        if (suggestion.brand) form.elements.brand.value = suggestion.brand;
+        if (suggestion.size) form.elements.size.value = suggestion.size;
+        if (suggestion.washingDetails) form.elements.washingDetails.value = suggestion.washingDetails;
+        suggestion.colors?.forEach((color) => {
+          const colorInput = form.querySelector(`input[name="color"][value="${CSS.escape(color)}"]`);
+          if (colorInput) { colorInput.checked = true; colorInput.dispatchEvent(new Event('change', { bubbles: true })); }
+        });
+      }
+    } catch (_) {
+      // AI suggestions are optional; continue with a fully editable form.
+    } finally {
+      showDetails();
+    }
+  });
+
+  photoInput.addEventListener('change', () => {
+    editedPhoto = undefined;
+    const file = photoInput.files?.[0];
+    photoEditingActions.classList.toggle('hidden', !file);
+    if (file) previewPhoto(file, 'Original photo selected');
+    else photoPreview.classList.add('hidden');
+  });
+  editPhoto.addEventListener('click', async () => {
+    const file = photoInput.files?.[0];
+    if (!file) return;
+    editPhoto.disabled = true;
+    editPhoto.querySelector('.loading').classList.remove('hidden');
+    editPhoto.querySelector('.button-label').textContent = 'Removing background…';
+    editStatus.textContent = 'Preparing your photo, then opening the mask editor. This can take a moment the first time.';
+    editStatus.classList.remove('hidden');
+    try {
+      const { prepareBackgroundRemovedImage } = await import('/js/background-removal.js');
+      const result = await prepareBackgroundRemovedImage(file);
+      editedPhoto = new File([result], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' });
+      const files = new DataTransfer();
+      files.items.add(editedPhoto);
+      photoInput.files = files.files;
+      previewPhoto(editedPhoto, 'Background removed and centered — ready to save');
+    } catch (error) {
+      console.warn('[bg-removal] Cleanup failed:', error);
+      editStatus.textContent = 'Background cleanup could not be completed. Your original photo is still ready to save.';
+      editStatus.classList.remove('hidden');
+    } finally {
+      editPhoto.disabled = false;
+      editPhoto.querySelector('.loading').classList.add('hidden');
+      editPhoto.querySelector('.button-label').textContent = 'Remove & refine background';
+      if (!editStatus.textContent.startsWith('Background cleanup could not')) editStatus.classList.add('hidden');
+    }
+  });
+  framePhoto.addEventListener('click', async () => {
+    const file = editedPhoto || photoInput.files?.[0];
+    if (!file) return;
+    framePhoto.disabled = true;
+    try {
+      const { openFrameEditor } = await import('/js/frame-editor.js');
+      const result = await openFrameEditor(file);
+      editedPhoto = new File([result], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' });
+      const files = new DataTransfer();
+      files.items.add(editedPhoto);
+      photoInput.files = files.files;
+      previewPhoto(editedPhoto, 'Framing adjusted — ready to save');
+    } finally {
+      framePhoto.disabled = false;
+    }
+  });
+</script>
+{{> maskEditor}}
+{{> frameEditor}}
+{{/unless}}
 
 {{>dock}}
