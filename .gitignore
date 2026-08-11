@@ -72,3 +72,4 @@ node_modules/
 
 # Load test results
 /scripts/results/
+/.agents
