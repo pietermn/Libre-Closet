@@ -168,6 +168,8 @@ npm run start:prod
 | `EMAIL_API_KEY`                    | Mailgun API key                                | -              | `fyhn2437cryb248cbrdc32`                                                                  |
 | `PUBLIC_VAPID_KEY`                 | Web push - generate for production             | -              | `BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U` |
 | `PRIVATE_VAPID_KEY`                | Web push - generate for production             | -              | `UUxI4O8-FbRouAevSmBQ6o18hgE4nSG3qwvJTfKc-ls`                                             |
+| `OPENAI_API_KEY`                   | Optional AI garment suggestions                 | -              | Set at runtime with `-e OPENAI_API_KEY=...`                                                 |
+| `OPENAI_MODEL`                     | Optional vision model for suggestions           | `gpt-5.6-luna` | `gpt-5.6-luna`                                                                             |
 
 Generate JWT secret:
 
