@@ -21,11 +21,27 @@ import { Payload } from '../auth/dto/payload.dto';
 import { OutfitService } from './outfit.service';
 import { GarmentService } from './garment.service';
 import { CalendarService } from './calendar.service';
+import { Garment } from '../dal/entity/garment.entity';
+import { Outfit } from '../dal/entity/outfit.entity';
+import { GarmentCategory } from './garment-category.enum';
 
 @UseGuards(ConditionalAuthGuard)
 @Controller('outfits')
 export class OutfitController {
   private readonly logger = new Logger(OutfitController.name);
+
+  // Keep the outfit preview visually readable from head to toe, regardless of
+  // the order returned by the database's many-to-many relation.
+  private static readonly outfitDisplayOrder: GarmentCategory[] = [
+    GarmentCategory.ACCESSORIES,
+    GarmentCategory.OUTERWEAR,
+    GarmentCategory.TOPS,
+    GarmentCategory.DRESSES,
+    GarmentCategory.BOTTOMS,
+    GarmentCategory.FOOTWEAR,
+    GarmentCategory.BAGS,
+    GarmentCategory.OTHER,
+  ];
 
   constructor(
     private readonly outfitService: OutfitService,
@@ -37,11 +53,57 @@ export class OutfitController {
     return (req['user'] as Payload | undefined)?.userId;
   }
 
+  private today(): string {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${now.getFullYear()}-${month}-${day}`;
+  }
+
+  private orderGarmentsForDisplay(garments: Garment[]): Garment[] {
+    const categoryIndex = new Map<string, number>(
+      OutfitController.outfitDisplayOrder.map((category, index) => [
+        category,
+        index,
+      ]),
+    );
+
+    return [...garments].sort((left, right) => {
+      const leftOrder =
+        categoryIndex.get(left.category) ?? Number.MAX_SAFE_INTEGER;
+      const rightOrder =
+        categoryIndex.get(right.category) ?? Number.MAX_SAFE_INTEGER;
+      return leftOrder - rightOrder || left.id - right.id;
+    });
+  }
+
+  private presentOutfit(outfit: Outfit) {
+    const garments = this.orderGarmentsForDisplay(outfit.garments.getItems());
+    return {
+      id: outfit.id,
+      name: outfit.name,
+      notes: outfit.notes,
+      shareableId: outfit.shareableId,
+      garments,
+      pieceCount: garments.length,
+    };
+  }
+
+  private allOutfitCategories(i18n: I18nContext) {
+    return Object.values(GarmentCategory).map((value) => ({
+      value,
+      label: this.garmentService.resolveCategoryLabel(value, i18n),
+    }));
+  }
+
   @Get()
   @Render('outfits/index')
   async index(@Req() req: FastifyRequest) {
     const outfits = await this.outfitService.findAll(this.userId(req));
-    return { outfits };
+    return {
+      today: this.today(),
+      outfits: outfits.map((outfit) => this.presentOutfit(outfit)),
+    };
   }
 
   @Get('new')
@@ -63,7 +125,7 @@ export class OutfitController {
       scheduleDate: scheduleDate || null,
       returnTo: returnTo || '/outfits',
       categoryRows,
-      allCategoryRows: categoryRows,
+      allCategoryRows: this.allOutfitCategories(i18n),
     };
   }
 
@@ -108,6 +170,7 @@ export class OutfitController {
   async rowFragment(
     @Query('category') category: string,
     @Query('index') indexStr: string,
+    @Query('garmentId') garmentIdStr: string | undefined,
     @Req() req: FastifyRequest,
     @Res() reply: FastifyReply,
     @I18n() i18n: I18nContext,
@@ -116,9 +179,44 @@ export class OutfitController {
     const garments = await this.garmentService.findAll(this.userId(req));
     const items = garments.filter((g) => g.category === category);
     const count = items.length;
-    const idx = Math.min(Math.max(parseInt(indexStr) || 0, 0), count);
+    const selectedIndex = garmentIdStr
+      ? items.findIndex((garment) => garment.id === Number(garmentIdStr)) + 1
+      : 0;
+    const idx = Math.min(
+      Math.max(selectedIndex || parseInt(indexStr) || 0, 0),
+      count,
+    );
     const row = this.outfitService.buildRow(category, items, idx, i18n);
     return reply.viewPartial('partials/outfit_row', { row });
+  }
+
+  @Get('picker-fragment')
+  async pickerFragment(
+    @Query('category') category: string,
+    @Query('selectedId') selectedIdStr: string | undefined,
+    @Req() req: FastifyRequest,
+    @Res() reply: FastifyReply,
+    @I18n() i18n: I18nContext,
+  ) {
+    if (!category?.trim()) return reply.status(400).send();
+    const selectedId = Number(selectedIdStr);
+    const garments = (await this.garmentService.findAll(this.userId(req)))
+      .filter((garment) => garment.category === category)
+      .map((garment) => ({
+        id: garment.id,
+        name: garment.name,
+        brand: garment.brand,
+        photo: garment.photo
+          ? `/file/nobg/${(garment.photo as any).fileName}`
+          : null,
+        selected: garment.id === selectedId,
+      }));
+
+    return reply.viewPartial('partials/garment_picker', {
+      category,
+      categoryLabel: this.garmentService.resolveCategoryLabel(category, i18n),
+      garments,
+    });
   }
 
   @Get(':id')
@@ -128,7 +226,7 @@ export class OutfitController {
     @Req() req: FastifyRequest,
   ) {
     const outfit = await this.outfitService.findOne(id, this.userId(req));
-    return { outfit };
+    return { outfit: this.presentOutfit(outfit), today: this.today() };
   }
 
   @Get(':id/edit')
@@ -155,7 +253,7 @@ export class OutfitController {
         i18n,
         outfit.slots,
       ),
-      allCategoryRows: this.outfitService.buildCategoryRows(garments, [], i18n),
+      allCategoryRows: this.allOutfitCategories(i18n),
     };
   }
 
