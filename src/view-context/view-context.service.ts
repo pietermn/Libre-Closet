@@ -44,7 +44,7 @@ export class ViewContextService {
     const ogImage = `${baseUrl}/assets/lazztech_icon.png`;
     let assetVersion = '0';
     try {
-      assetVersion = statSync(join(__dirname, '..', 'public', 'bundle.css'))
+      assetVersion = statSync(join(__dirname, '..', '..', 'public', 'bundle.css'))
         .mtimeMs
         .toString(36);
     } catch {
