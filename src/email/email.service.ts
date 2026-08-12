@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { Email } from './dto/email.dto';
@@ -8,7 +12,7 @@ import mg from 'nodemailer-mailgun-transport';
 @Injectable()
 export class EmailService {
   private logger = new Logger(EmailService.name);
-  private transporter: nodemailer.Transporter;
+  private transporter?: nodemailer.Transporter;
   public readonly primaryEmailAddress?: string;
   private readonly transport?: string;
 
@@ -42,6 +46,12 @@ export class EmailService {
   public async sendEmailFromPrimaryAddress(options: EmailOptions) {
     this.logger.debug(this.sendEmailFromPrimaryAddress.name);
 
+    if (!this.transporter || !this.primaryEmailAddress) {
+      throw new ServiceUnavailableException(
+        'Password reset email is not configured',
+      );
+    }
+
     return await this.sendEmail({
       from: this.configService.getOrThrow<string>('EMAIL_FROM_ADDRESS'),
       to: options.to,
@@ -53,6 +63,12 @@ export class EmailService {
 
   private async sendEmail(email: Email) {
     this.logger.debug(this.sendEmail.name);
+
+    if (!this.transporter) {
+      throw new ServiceUnavailableException(
+        'Password reset email is not configured',
+      );
+    }
 
     const messageId = await this.transporter
       .sendMail(email as nodemailer.SendMailOptions)

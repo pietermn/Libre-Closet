@@ -148,11 +148,13 @@ export class AuthController {
         `/auth/reset-code?email=${encodeURIComponent(emailDto.email)}`,
         302,
       );
-    } catch (error) {
+    } catch {
       this.logger.warn('Password reset email delivery failed');
       return reply.view('auth/reset', {
         layout: 'layout',
-        error,
+        input: emailDto,
+        error:
+          'Password reset email is not configured or could not be delivered. Please contact the administrator.',
         ...((reply as any).locals ?? {}),
       });
     }

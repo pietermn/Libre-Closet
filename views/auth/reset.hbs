@@ -19,11 +19,13 @@
         d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     </svg>
-    <span>{{t 'lang.ERROR'}}</span>
+    <span>{{error}}</span>
   </div>
   {{/if}}
 
-  <form hx-post="/auth/reset" hx-indicator="#loading" hx-trigger="submit">
+  {{!-- Reset errors render a complete page. Keep this a normal post so HTMX
+  never inserts that page inside the current form. --}}
+  <form method="post" action="/auth/reset" hx-boost="false">
     <fieldset
       class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
     >
