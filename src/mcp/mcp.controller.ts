@@ -72,7 +72,7 @@ export class McpOAuthController {
   async authorize(
     @Query() query: Record<string, string | undefined>,
     @User() user: Payload,
-    @Res() reply: FastifyReply,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     const request = await this.mcp.authorizationRequest({
       clientId: query.client_id ?? '', redirectUri: query.redirect_uri ?? '',
@@ -163,7 +163,7 @@ export class McpController {
     @Body() message: JsonRpcRequest,
     @Headers('authorization') authorization: string | undefined,
     @Req() request: FastifyRequest,
-    @Res() reply: FastifyReply,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     const id = message.id ?? null;
     if (message.jsonrpc !== '2.0' || !message.method) return reply.code(400).send(this.error(id, -32600, 'Invalid JSON-RPC request'));
