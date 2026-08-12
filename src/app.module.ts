@@ -22,6 +22,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ErrorViewFilter } from './error-view.filter';
 import { ViewContextModule } from './view-context/view-context.module';
 import { AiModule } from './ai/ai.module';
+import { McpModule } from './mcp/mcp.module';
 
 @Module({
   imports: [
@@ -206,6 +207,7 @@ import { AiModule } from './ai/ai.module';
     WardrobeShareModule,
     ViewContextModule,
     AiModule,
+    McpModule,
   ],
   controllers: [AppController],
   providers: [

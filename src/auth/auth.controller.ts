@@ -77,7 +77,11 @@ export class AuthController {
 
   @Throttle({ default: { limit: 5, ttl: seconds(60) } })
   @Post('login')
-  async postLogin(@Body() loginDto: LoginDto, @Res() reply: FastifyReply) {
+  async postLogin(
+    @Body() loginDto: LoginDto,
+    @Query('returnTo') returnTo: string | undefined,
+    @Res() reply: FastifyReply,
+  ) {
     try {
       const jwt = await this.authService.signIn(
         loginDto.email,
@@ -87,7 +91,7 @@ export class AuthController {
         path: '/',
         ...this.cookieOptions(),
       });
-      reply.redirect('/auth/profile', 302);
+      reply.redirect(this.safeReturnTo(returnTo) ?? '/auth/profile', 302);
     } catch (error) {
       this.logger.warn('Failed login attempt');
       return reply.view('auth/login', {
@@ -109,11 +113,20 @@ export class AuthController {
 
   @Get('login')
   @Render('auth/login')
-  getLogin(@I18n() i18n: I18nContext): any {
+  getLogin(
+    @I18n() i18n: I18nContext,
+    @Query('returnTo') returnTo: string | undefined,
+  ): any {
     return {
       ogTitle: i18n.t('lang.LOGIN_OG_TITLE'),
       ogDescription: i18n.t('lang.LOGIN_OG_DESC'),
+      returnTo: this.safeReturnTo(returnTo),
     };
+  }
+
+  private safeReturnTo(returnTo: string | undefined): string | undefined {
+    if (!returnTo?.startsWith('/') || returnTo.startsWith('//')) return undefined;
+    return returnTo;
   }
 
   @Get('reset')
