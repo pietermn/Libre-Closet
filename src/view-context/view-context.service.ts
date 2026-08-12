@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { FastifyRequest } from 'fastify';
 import { I18nContext } from 'nestjs-i18n';
+import { statSync } from 'node:fs';
+import { join } from 'node:path';
 import { User } from '../dal/entity/user.entity';
 
 @Injectable()
@@ -40,6 +42,14 @@ export class ViewContextService {
     const appDescription =
       'Self-hosted wardrobe organizer. Catalog clothes with photos, build outfits, and install as an offline PWA. Free and open-source. No subscription, no ads.';
     const ogImage = `${baseUrl}/assets/lazztech_icon.png`;
+    let assetVersion = '0';
+    try {
+      assetVersion = statSync(join(__dirname, '..', 'public', 'bundle.css'))
+        .mtimeMs
+        .toString(36);
+    } catch {
+      this.logger.warn('Unable to determine stylesheet version');
+    }
 
     const context: Record<string, any> = {
       appName,
@@ -55,6 +65,7 @@ export class ViewContextService {
       ogTitle: appName,
       ogDescription: appDescription,
       ogImage,
+      assetVersion,
     };
 
     try {

@@ -58,7 +58,7 @@ async function bootstrap() {
 
   // Security headers on all responses
   // eslint-disable-next-line @typescript-eslint/require-await -- Fastify onSend hook must return a Promise if not using the callback (next) pattern
-  fastify.addHook('onSend', async (_request, reply, payload) => {
+  fastify.addHook('onSend', async (request, reply, payload) => {
     reply.header('X-Content-Type-Options', 'nosniff');
     reply.header('X-Frame-Options', 'DENY');
     reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -70,6 +70,9 @@ async function bootstrap() {
       'Content-Security-Policy',
       "default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob: https://static.cloudflareinsights.com; worker-src 'self' blob:; frame-ancestors 'none';",
     );
+    if (request.url.startsWith('/bundle.css')) {
+      reply.header('Cache-Control', 'no-store');
+    }
     return payload;
   });
 
