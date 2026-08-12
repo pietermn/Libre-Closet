@@ -10,12 +10,8 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  @Render('index')
-  index(@I18n() i18n: I18nContext): any {
-    return {
-      pageTitle: i18n.t('lang.PAGE_TITLE_HOME'),
-      ogTitle: i18n.t('lang.PAGE_TITLE_HOME'),
-    };
+  index(@Res() reply: FastifyReply): void {
+    reply.redirect('/auth/login', 302);
   }
 
   @Get('privacy')

@@ -84,7 +84,7 @@ import { McpModule } from './mcp/mcp.module';
           .valid('development', 'production', 'test')
           .default('production'),
         PORT: Joi.number().default(3000),
-        APP_NAME: Joi.string().default('Boilerplate'),
+        APP_NAME: Joi.string().default('Franklinplein'),
         AUTH_ENABLED: Joi.boolean().default(false),
         DISABLE_REGISTRATION: Joi.boolean().default(false),
         PWA_ENABLED: Joi.boolean().default(false),
