@@ -12,10 +12,12 @@ and response bandwidth/latency. */
 }
 
 .drawer.navbar {
-  position: fixed;
+  /* Keep the app chrome in the document flow. Previously this wrapper was
+     fixed, so every page had to guess the header height with padding and the
+     header could cover its first content. Sticky preserves the drawer while
+     reserving the navbar's 4rem of vertical space. */
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 1000;
 }
 
