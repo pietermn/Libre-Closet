@@ -136,20 +136,24 @@ export class AuthService {
     if (!user?.email) return;
 
     const pin = randomBytes(24).toString('base64url');
-    await this.emailService.sendEmailFromPrimaryAddress({
-      to: user.email,
-      subject: `Password reset for ${user.email}`,
-      text: `Hello, ${user.email}, please paste in the follow to reset your password: ${pin}`,
-      html: this.passwordResetTemplate({ email: user.email, pin }),
-    });
-
     const existingReset = await user.passwordReset.load();
     const passwordReset =
-      existingReset ?? this.passwordResetRepository.create({ user });
+      existingReset ?? this.passwordResetRepository.create();
     passwordReset.pin = this.hashResetCode(pin);
     passwordReset.expiresAt = new Date(Date.now() + 15 * 60 * 1000);
     passwordReset.usedAt = undefined;
-    await this.em.persistAndFlush(passwordReset);
+
+    // User owns the foreign key (`user.password_reset_id`). Setting the
+    // inverse-side relation on PasswordReset alone does not persist it.
+    if (!existingReset) user.passwordReset.set(passwordReset);
+    await this.em.persistAndFlush(user);
+
+    await this.emailService.sendEmailFromPrimaryAddress({
+      to: user.email,
+      subject: `Password reset for ${user.email}`,
+      text: `Hello, ${user.email}, please paste in the following code to reset your password: ${pin}`,
+      html: this.passwordResetTemplate({ email: user.email, pin }),
+    });
   }
 
   private hashResetCode(code: string): string {
