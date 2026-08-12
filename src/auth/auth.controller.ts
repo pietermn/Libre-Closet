@@ -148,8 +148,11 @@ export class AuthController {
         `/auth/reset-code?email=${encodeURIComponent(emailDto.email)}`,
         302,
       );
-    } catch {
-      this.logger.warn('Password reset email delivery failed');
+    } catch (error) {
+      this.logger.error(
+        'Password reset request failed',
+        error instanceof Error ? error.stack : undefined,
+      );
       return reply.view('auth/reset', {
         layout: 'layout',
         input: emailDto,
