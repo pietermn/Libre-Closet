@@ -136,7 +136,7 @@ export class AuthService {
     if (!user?.email) return;
 
     const pin = randomBytes(24).toString('base64url');
-    const existingReset = await user.passwordReset.load();
+    const existingReset = await this.passwordResetRepository.findOne({ user });
     const passwordReset =
       existingReset ?? this.passwordResetRepository.create({ user });
     passwordReset.pin = this.hashResetCode(pin);
