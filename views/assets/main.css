@@ -12,13 +12,9 @@ and response bandwidth/latency. */
 }
 
 .drawer.navbar {
-  /* Keep the app chrome in the document flow. Previously this wrapper was
-     fixed, so every page had to guess the header height with padding and the
-     header could cover its first content. Sticky preserves the drawer while
-     reserving the navbar's 4rem of vertical space. */
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  /* Keep the app chrome fully in document flow. A sticky stacking context
+     can make iOS/Safari soften content around the top edge while scrolling. */
+  position: relative;
 }
 
 /* ── Calendar: outfit chip colors (outfit.id % 6) ─────────────────────── */
