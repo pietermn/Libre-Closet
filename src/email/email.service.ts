@@ -40,6 +40,19 @@ export class EmailService {
           pass: this.configService.get<string>('EMAIL_PASSWORD'),
         },
       });
+    } else if (this.transport === 'smtp') {
+      const host = this.configService.get<string>('EMAIL_SMTP_HOST');
+      const port = this.configService.get<number>('EMAIL_SMTP_PORT');
+      const user = this.configService.get<string>('EMAIL_SMTP_USER');
+      const pass = this.configService.get<string>('EMAIL_SMTP_PASSWORD');
+      if (host && port && user && pass) {
+        this.transporter = nodemailer.createTransport({
+          host,
+          port,
+          secure: this.configService.get<boolean>('EMAIL_SMTP_SECURE') ?? port === 465,
+          auth: { user, pass },
+        });
+      }
     }
   }
 

@@ -164,8 +164,13 @@ npm run start:prod
 | `OBJECT_STORAGE_REGION`            | S3 region                                      | `us-east-1`    | `us-west-1`                                                                               |
 | `OBJECT_STORAGE_BUCKET_NAME`       | S3 bucket name                                 | `libre-closet` | `my-awesome-closet-manager-bucket`                                                        |
 | `EMAIL_FROM_ADDRESS`               | From address for password reset emails         | -              | `LibreCloset@example.com`                                                                 |
-| `EMAIL_TRANSPORT`                  | `gmail` or `mailgun`                           | `gmail`        | `mailgun`                                                                                 |
+| `EMAIL_TRANSPORT`                  | `gmail`, `mailgun`, or generic `smtp`          | -              | `smtp`                                                                                    |
 | `EMAIL_API_KEY`                    | Mailgun API key                                | -              | `fyhn2437cryb248cbrdc32`                                                                  |
+| `EMAIL_SMTP_HOST`                  | SMTP server hostname (when transport is `smtp`) | -              | `smtp.example.com`                                                                        |
+| `EMAIL_SMTP_PORT`                  | SMTP server port                                | -              | `465`                                                                                     |
+| `EMAIL_SMTP_USER`                  | SMTP login username                             | -              | `noreply@example.com`                                                                     |
+| `EMAIL_SMTP_PASSWORD`              | SMTP login password                             | -              | Set at runtime                                                                            |
+| `EMAIL_SMTP_SECURE`                | Use implicit TLS; normally true for port 465    | -              | `true`                                                                                    |
 | `PUBLIC_VAPID_KEY`                 | Web push - generate for production             | -              | `BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U` |
 | `PRIVATE_VAPID_KEY`                | Web push - generate for production             | -              | `UUxI4O8-FbRouAevSmBQ6o18hgE4nSG3qwvJTfKc-ls`                                             |
 | `OPENAI_API_KEY`                   | Optional AI garment suggestions                 | -              | Set at runtime with `-e OPENAI_API_KEY=...`                                                 |

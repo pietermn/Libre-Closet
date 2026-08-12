@@ -174,6 +174,25 @@ import { McpModule } from './mcp/mcp.module';
         }),
         OPENAI_API_KEY: Joi.string().optional(),
         OPENAI_MODEL: Joi.string().default('gpt-5.6-luna'),
+        EMAIL_TRANSPORT: Joi.string().valid('gmail', 'mailgun', 'smtp').optional(),
+        EMAIL_FROM_ADDRESS: Joi.string().email().when('EMAIL_TRANSPORT', {
+          is: Joi.exist(), then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_HOST: Joi.string().hostname().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_PORT: Joi.number().port().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_USER: Joi.string().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_PASSWORD: Joi.string().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_SECURE: Joi.boolean().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.optional(), otherwise: Joi.optional(),
+        }),
       }),
       validationOptions: {
         abortEarly: true,
