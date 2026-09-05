@@ -1,13 +1,69 @@
 {{>navbar}}
-<main class="flex flex-col justify-center items-center h-full gap-3">
-  <h1 class="text-2xl">{{user.email}}</h1>
-  <a class="link" href="/auth/update-email">{{t 'lang.UPDATE_EMAIL'}}</a>
-  <a class="link" href="/auth/reset?email={{user.email}}"
-    >{{t 'lang.CHANGE_PASSWORD'}}</a
-  >
-  {{#if authEnabled}}
-  <a class="link" href="/wardrobe-share/manage">{{t 'lang.WARDROBE_SHARING'}}</a>
-  {{/if}}
-  <a class="link" href="/auth/delete-account">{{t 'lang.DELETE_ACCOUNT'}}</a>
+
+<main class="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-5xl flex-col justify-center px-4 pt-8 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10">
+  <section class="grid overflow-hidden rounded-box border border-base-content/10 bg-base-100 shadow-xl lg:grid-cols-[1.05fr_1.45fr]">
+    <div class="relative overflow-hidden bg-neutral p-7 text-neutral-content sm:p-10">
+      <div class="absolute -right-16 -top-20 size-64 rounded-full bg-primary/25 blur-3xl" aria-hidden="true"></div>
+      <div class="absolute -bottom-24 -left-20 size-56 rounded-full bg-secondary/15 blur-3xl" aria-hidden="true"></div>
+      <div class="relative flex flex-col">
+        <div class="flex items-center gap-4">
+          <div class="avatar avatar-placeholder">
+            <div class="w-16 rounded-full bg-primary text-primary-content ring ring-primary-content/20 ring-offset-4 ring-offset-neutral">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="size-8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.12a7.5 7.5 0 0 1 15 0A17.93 17.93 0 0 1 12 21.75c-2.676 0-5.216-.584-7.5-1.63Z" /></svg>
+            </div>
+          </div>
+          <div>
+            <p class="text-sm font-medium uppercase tracking-[0.2em] text-neutral-content/60">Your closet</p>
+            <h1 class="mt-1 break-all text-xl font-semibold leading-tight">{{user.email}}</h1>
+          </div>
+        </div>
+        <div class="mt-8 space-y-3">
+          <p class="max-w-sm text-lg leading-relaxed text-neutral-content/80">Your account is the private key to every look, garment, plan and AI connection.</p>
+          <div class="badge badge-outline border-neutral-content/30 px-3 py-3 text-neutral-content/75">Private &amp; self-hosted</div>
+        </div>
+        <a href="/wardrobe" class="btn btn-primary mt-8 w-fit">Open wardrobe <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+
+    <div class="p-5 sm:p-8">
+      <div class="mb-6 flex items-end justify-between gap-4">
+        <div>
+          <p class="text-sm font-medium uppercase tracking-[0.18em] text-base-content/45">Account settings</p>
+          <h2 class="mt-1 text-2xl font-semibold">Keep control</h2>
+        </div>
+        <span class="badge badge-success badge-soft">Active</span>
+      </div>
+
+      <ul class="list rounded-box border border-base-content/10 bg-base-200/45">
+        <li class="list-row">
+          <span class="grid size-10 place-items-center rounded-box bg-base-100 text-primary shadow-sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M16.5 10.5V6.75a4.5 4.5 0 0 0-9 0v3.75m-1.5 0h12A1.5 1.5 0 0 1 19.5 12v7.5A1.5 1.5 0 0 1 18 21H6a1.5 1.5 0 0 1-1.5-1.5V12A1.5 1.5 0 0 1 6 10.5Z" /></svg></span>
+          <div class="list-col-grow"><div class="font-medium">{{t 'lang.CHANGE_PASSWORD'}}</div><div class="text-sm text-base-content/55">Update your sign-in credentials.</div></div>
+          <a class="btn btn-sm btn-ghost" href="/auth/reset?email={{uri user.email}}">Manage</a>
+        </li>
+        <li class="list-row">
+          <span class="grid size-10 place-items-center rounded-box bg-base-100 text-info shadow-sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M3 8.25 10.89 13.51a2.02 2.02 0 0 0 2.22 0L21 8.25m-18 8.25V7.5A2.25 2.25 0 0 1 5.25 5.25h13.5A2.25 2.25 0 0 1 21 7.5v9A2.25 2.25 0 0 1 18.75 18.75H5.25A2.25 2.25 0 0 1 3 16.5Z" /></svg></span>
+          <div class="list-col-grow"><div class="font-medium">{{t 'lang.UPDATE_EMAIL'}}</div><div class="text-sm text-base-content/55">Change the email for this account.</div></div>
+          <a class="btn btn-sm btn-ghost" href="/auth/update-email">Manage</a>
+        </li>
+        {{#if authEnabled}}
+        <li class="list-row">
+          <span class="grid size-10 place-items-center rounded-box bg-base-100 text-secondary shadow-sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8.25 18.75a3.75 3.75 0 0 1-3.75-3.75V8.25a3.75 3.75 0 0 1 7.5 0V15a2.25 2.25 0 0 1-4.5 0V9.75" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M12.75 8.25a3.75 3.75 0 0 1 7.5 0V15a3.75 3.75 0 0 1-3.75 3.75" /></svg></span>
+          <div class="list-col-grow"><div class="font-medium">{{t 'lang.WARDROBE_SHARING'}}</div><div class="text-sm text-base-content/55">Manage shared wardrobes and access.</div></div>
+          <a class="btn btn-sm btn-ghost" href="/wardrobe-share/manage">Manage</a>
+        </li>
+        <li class="list-row">
+          <span class="grid size-10 place-items-center rounded-box bg-base-100 text-accent shadow-sm" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="size-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M12 6.75a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M19.5 12a7.5 7.5 0 0 1-10.77 6.75M4.5 12A7.5 7.5 0 0 1 15.27 5.25" /></svg></span>
+          <div class="list-col-grow"><div class="font-medium">Connect your AI</div><div class="text-sm text-base-content/55">Review and revoke private MCP connections.</div></div>
+          <a class="btn btn-sm btn-ghost" href="/auth/mcp">Manage</a>
+        </li>
+        {{/if}}
+      </ul>
+
+      <div class="mt-6 flex items-center justify-between border-t border-base-content/10 pt-5">
+        <div><p class="font-medium text-error">{{t 'lang.DELETE_ACCOUNT'}}</p><p class="text-sm text-base-content/55">This action cannot be undone.</p></div>
+        <a class="btn btn-error btn-outline btn-sm" href="/auth/delete-account">Delete</a>
+      </div>
+    </div>
+  </section>
 </main>
 {{>dock}}

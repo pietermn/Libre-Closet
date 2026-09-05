@@ -1,4 +1,5 @@
-<nav class="fixed left-1/2 right-auto bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 flex h-[4.25rem] w-[min(24rem,calc(100%-2rem))] -translate-x-1/2 items-center justify-around gap-1 rounded-box border border-base-content/10 bg-base-100/88 p-1.5 shadow-lg backdrop-blur-xl" aria-label="Primary navigation">
+{{#if user}}
+<nav class="fixed left-1/2 right-auto bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 flex h-[4.25rem] w-[min(24rem,calc(100%-2rem))] -translate-x-1/2 items-center justify-around gap-1 rounded-box border border-base-content/10 bg-base-100 p-1.5 shadow-lg" aria-label="Primary navigation">
   <a href="/wardrobe" class="flex min-h-14 flex-1 items-center justify-center rounded-box px-2 text-base-content/55 transition-[background-color,color,transform] duration-150 ease-out hover:bg-base-200/90 hover:text-base-content active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none {{#ifEquals baseUrl "/wardrobe"}}text-primary{{/ifEquals}}" {{#ifEquals baseUrl "/wardrobe"}}aria-current="page"{{/ifEquals}}>
     <span class="grid size-11 place-items-center rounded-box transition-[background-color,color,transform] duration-150 ease-out motion-reduce:transition-none {{#ifEquals baseUrl "/wardrobe"}}bg-primary text-primary-content shadow-sm{{/ifEquals}}">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="size-6" aria-hidden="true">
@@ -26,3 +27,4 @@
     <span class="sr-only">{{t 'lang.CALENDAR'}}</span>
   </a>
 </nav>
+{{/if}}

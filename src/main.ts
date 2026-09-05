@@ -32,12 +32,33 @@ async function bootstrap() {
   const fastify = app.getHttpAdapter().getInstance();
   fastify.decorateReply('locals', null);
   fastify.addHook('preHandler', async (req, reply) => {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+      const origin = req.headers.origin;
+      if (origin) {
+        const protocol =
+          (req.headers['x-forwarded-proto'] as string | undefined)?.split(
+            ',',
+            1,
+          )[0] ?? req.protocol;
+        const host =
+          (req.headers['x-forwarded-host'] as string | undefined)?.split(
+            ',',
+            1,
+          )[0] ?? req.host;
+        if (origin !== `${protocol}://${host}`) {
+          return reply.code(403).send({ message: 'Invalid request origin' });
+        }
+      }
+      if (req.headers['sec-fetch-site'] === 'cross-site') {
+        return reply.code(403).send({ message: 'Cross-site request blocked' });
+      }
+    }
     reply.locals = await viewContextService.buildContext(req);
   });
 
   // Security headers on all responses
   // eslint-disable-next-line @typescript-eslint/require-await -- Fastify onSend hook must return a Promise if not using the callback (next) pattern
-  fastify.addHook('onSend', async (_request, reply, payload) => {
+  fastify.addHook('onSend', async (request, reply, payload) => {
     reply.header('X-Content-Type-Options', 'nosniff');
     reply.header('X-Frame-Options', 'DENY');
     reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -47,8 +68,11 @@ async function bootstrap() {
     );
     reply.header(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob: https://static.cloudflareinsights.com; worker-src 'self' blob:; frame-ancestors 'none';",
+      "default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob: https://static.cloudflareinsights.com; worker-src 'self' blob:; frame-ancestors 'none';",
     );
+    if (request.url.startsWith('/bundle.css')) {
+      reply.header('Cache-Control', 'no-store');
+    }
     return payload;
   });
 
@@ -57,8 +81,8 @@ async function bootstrap() {
   await app.register(fastifyCompress);
   await app.register(fastifyMultipart, {
     limits: {
-      fileSize: 100 * 1024 * 1024, // 100MB
-      files: 5,
+      fileSize: 10 * 1024 * 1024,
+      files: 1,
     },
   });
 

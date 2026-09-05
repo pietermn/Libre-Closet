@@ -76,19 +76,16 @@
             Add a category
           </p>
           <div class="flex gap-2">
-            <input
-              type="text"
+            <select
               id="add-row-input"
-              list="add-row-suggestions"
               class="input input-sm min-w-0 flex-1"
-              placeholder="{{t 'lang.TYPE_OR_SELECT_CATEGORY'}}"
-              autocomplete="off"
-            />
-            <datalist id="add-row-suggestions">
+              aria-label="{{t 'lang.TYPE_OR_SELECT_CATEGORY'}}"
+            >
+              <option value="" selected disabled>{{t 'lang.TYPE_OR_SELECT_CATEGORY'}}</option>
               {{#each allCategoryRows}}
-              <option value="{{this.value}}"></option>
+              <option value="{{this.value}}">{{this.label}}</option>
               {{/each}}
-            </datalist>
+            </select>
             <button
               type="button"
               class="btn btn-outline btn-sm shrink-0"

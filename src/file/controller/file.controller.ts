@@ -1,6 +1,7 @@
 import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import {
+  BadRequestException,
   Controller,
   Get,
   Header,
@@ -19,6 +20,7 @@ import { User } from '../../auth/user.decorator';
 import { User as UserEntity } from '../../dal/entity/user.entity';
 import { FileService } from '../file-service.abstract';
 import { ConditionalAuthGuard } from '../../auth/conditional-auth.guard';
+import { seconds, Throttle } from '@nestjs/throttler';
 
 @Controller('file')
 export class FileController {
@@ -44,6 +46,7 @@ export class FileController {
   }
 
   @UseGuards(AuthGuard)
+  @Throttle({ default: { limit: 10, ttl: seconds(60) } })
   @Post('upload')
   @Render('files')
   async uploadFile(@User() payload: Payload, @Req() req: FastifyRequest) {
@@ -61,6 +64,7 @@ export class FileController {
   @Get(':fileName')
   @Header('Cache-Control', 'public, max-age=31536000, immutable') // public for CDN, max-age= 1 year for immutable content
   async getFile(@Param('fileName') fileName: string) {
+    this.assertSafeFileName(fileName);
     return this.fileService.get(fileName);
   }
 
@@ -75,6 +79,7 @@ export class FileController {
   @Get('nobg/:fileName')
   @Header('content-type', 'image/webp')
   async nobg(@Param('fileName') fileName: string, @Res() reply: FastifyReply) {
+    this.assertSafeFileName(fileName);
     const stream = await this.fileService.getNobgVariant(fileName);
     if (!stream) {
       return reply
@@ -90,5 +95,11 @@ export class FileController {
       }
     });
     return reply.send(stream);
+  }
+
+  private assertSafeFileName(fileName: string): void {
+    if (!this.fileService.isSafeFileName(fileName)) {
+      throw new BadRequestException('Invalid file name');
+    }
   }
 }

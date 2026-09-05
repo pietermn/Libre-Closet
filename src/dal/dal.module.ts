@@ -28,7 +28,9 @@ import path from 'path';
                 pathTs: path.join(__dirname, 'migrations/sqlite'),
                 transactional: true,
               },
-              logger: (message) => console.log(message),
+              // MikroORM migrations still invoke the configured writer; using
+              // `false` causes DefaultLogger to call a non-function at boot.
+              logger: (message: string) => console.debug(message),
               allowGlobalContext: true,
               debug: configService.get('NODE_ENV') !== 'production',
             } as MikroOrmModuleOptions<IDatabaseDriver<Connection>>;
@@ -58,7 +60,7 @@ import path from 'path';
                     : undefined,
                 },
               },
-              logger: (message) => console.log(message),
+              logger: (message: string) => console.debug(message),
               allowGlobalContext: true,
               debug: configService.get('NODE_ENV') !== 'production',
             } as MikroOrmModuleOptions<IDatabaseDriver<Connection>>;

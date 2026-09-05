@@ -43,7 +43,7 @@ export class OpenGraphService {
       return {
         ogUrl: `${req.protocol}://${req.host}/file/${shareableId}`,
         ogTitle: file?.fileName,
-        ogDescription: `From ${createdBy?.email}`,
+        ogDescription: 'Shared from Libre Closet',
         ogImage: this.fileUrlService.getWatermarkedFileUrl(shareableId, req),
         file,
         createdBy,
@@ -65,7 +65,7 @@ export class OpenGraphService {
       return {
         ogUrl: `${req.protocol}://${req.host}/share?shareableId=${shareableId}&type=garment`,
         ogTitle: garment?.name,
-        ogDescription: `From ${createdBy?.email}`,
+        ogDescription: 'Shared from Libre Closet',
         ogImage,
         garment,
         createdBy,
@@ -90,7 +90,7 @@ export class OpenGraphService {
       return {
         ogUrl: `${req.protocol}://${req.host}/share?shareableId=${shareableId}&type=outfit`,
         ogTitle: outfit?.name,
-        ogDescription: `From ${createdBy?.email}`,
+        ogDescription: 'Shared from Libre Closet',
         ogImage,
         outfit,
         createdBy,

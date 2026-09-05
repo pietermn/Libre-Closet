@@ -22,6 +22,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ErrorViewFilter } from './error-view.filter';
 import { ViewContextModule } from './view-context/view-context.module';
 import { AiModule } from './ai/ai.module';
+import { McpModule } from './mcp/mcp.module';
 
 @Module({
   imports: [
@@ -38,6 +39,18 @@ import { AiModule } from './ai/ai.module';
         };
         return {
           pinoHttp: {
+            redact: {
+              paths: [
+                'req.headers.authorization',
+                'req.headers.cookie',
+                'req.body.password',
+                'req.body.oldPassword',
+                'req.body.newPassword',
+                'req.body.resetCode',
+                'req.body.token',
+              ],
+              censor: '[REDACTED]',
+            },
             transport: {
               targets: [
                 {
@@ -71,11 +84,15 @@ import { AiModule } from './ai/ai.module';
           .valid('development', 'production', 'test')
           .default('production'),
         PORT: Joi.number().default(3000),
-        APP_NAME: Joi.string().default('Boilerplate'),
+        APP_NAME: Joi.string().default('Franklinplein'),
         AUTH_ENABLED: Joi.boolean().default(false),
         DISABLE_REGISTRATION: Joi.boolean().default(false),
         PWA_ENABLED: Joi.boolean().default(false),
-        ACCESS_TOKEN_SECRET: Joi.string().default('ChangeMe!'),
+        ACCESS_TOKEN_SECRET: Joi.string().when('AUTH_ENABLED', {
+          is: true,
+          then: Joi.string().min(32).invalid('ChangeMe!').required(),
+          otherwise: Joi.string().default('development-auth-disabled-secret'),
+        }),
         PUBLIC_VAPID_KEY: Joi.optional().default(
           'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U',
         ),
@@ -157,6 +174,25 @@ import { AiModule } from './ai/ai.module';
         }),
         OPENAI_API_KEY: Joi.string().optional(),
         OPENAI_MODEL: Joi.string().default('gpt-5.6-luna'),
+        EMAIL_TRANSPORT: Joi.string().valid('gmail', 'mailgun', 'smtp').optional(),
+        EMAIL_FROM_ADDRESS: Joi.string().email().when('EMAIL_TRANSPORT', {
+          is: Joi.exist(), then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_HOST: Joi.string().hostname().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_PORT: Joi.number().port().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_USER: Joi.string().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_PASSWORD: Joi.string().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.required(), otherwise: Joi.optional(),
+        }),
+        EMAIL_SMTP_SECURE: Joi.boolean().when('EMAIL_TRANSPORT', {
+          is: 'smtp', then: Joi.optional(), otherwise: Joi.optional(),
+        }),
       }),
       validationOptions: {
         abortEarly: true,
@@ -190,6 +226,7 @@ import { AiModule } from './ai/ai.module';
     WardrobeShareModule,
     ViewContextModule,
     AiModule,
+    McpModule,
   ],
   controllers: [AppController],
   providers: [

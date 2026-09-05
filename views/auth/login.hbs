@@ -36,7 +36,9 @@
   </div>
   {{/if}}
 
-  <form hx-post="/auth/login" hx-indicator="#loading" hx-trigger="submit">
+  {{!-- Login failures render the complete login page. Keep this as a normal
+  form submission so HTMX does not insert that page inside this form. --}}
+  <form method="post" action="/auth/login{{#if returnTo}}?returnTo={{uri returnTo}}{{/if}}">
     <fieldset
       class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
     >

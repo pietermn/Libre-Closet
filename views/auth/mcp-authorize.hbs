@@ -1,0 +1,16 @@
+{{>navbar}}
+<main class="flex min-h-full items-center justify-center p-4">
+  <form method="post" action="/oauth/authorize" class="card w-full max-w-lg bg-base-200 shadow-xl">
+    <div class="card-body">
+      <h1 class="card-title">Connect {{client.name}} to your closet?</h1>
+      <p>This grants access only to <strong>{{userEmail}}</strong>'s Libre-Closet data.</p>
+      <ul class="list-disc pl-5 text-sm">
+        {{#each scopes}}<li>{{this}}</li>{{/each}}
+      </ul>
+      <p class="text-sm opacity-70">You can revoke this connection from your profile at any time.</p>
+      {{#each request}}<input type="hidden" name="{{@key}}" value="{{this}}" />{{/each}}
+      <input type="hidden" name="approve" value="true" />
+      <div class="card-actions justify-end"><button class="btn btn-primary" type="submit">Allow access</button></div>
+    </div>
+  </form>
+</main>

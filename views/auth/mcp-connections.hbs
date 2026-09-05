@@ -1,0 +1,19 @@
+{{>navbar}}
+<main class="mx-auto flex min-h-full w-full max-w-2xl flex-col gap-4 p-4">
+  <h1 class="text-2xl font-bold">Connect your AI</h1>
+  <p>Use this MCP server URL in Codex: <code class="select-all">{{mcpUrl}}</code></p>
+  <p class="text-sm opacity-70">Connecting opens Libre-Closet login and lets you approve the requested read and write permissions. Each connection is limited to your own closet.</p>
+  <h2 class="text-lg font-semibold">Connected clients</h2>
+  {{#if connections.length}}
+    {{#each connections}}
+    <section class="rounded-box bg-base-200 p-4">
+      <div class="flex items-center justify-between gap-4"><strong>{{name}}</strong><form method="post" action="/auth/mcp/{{clientId}}/revoke"><button class="btn btn-sm btn-error" type="submit">Revoke</button></form></div>
+      <p class="mt-2 text-sm">{{join scopes ', '}}</p>
+      <p class="mt-1 text-xs opacity-60">Connected {{formatDate connectedAt}}</p>
+    </section>
+    {{/each}}
+  {{else}}
+    <p class="opacity-70">No AI clients are connected.</p>
+  {{/if}}
+</main>
+{{>dock}}

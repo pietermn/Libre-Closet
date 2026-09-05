@@ -54,7 +54,12 @@ export class AiGarmentService {
   async analyze(upload?: MultipartFile): Promise<GarmentSuggestion> {
     const apiKey = this.config.get<string>('OPENAI_API_KEY');
     if (!apiKey) return { available: false };
-    if (!upload?.mimetype.startsWith('image/')) {
+    if (
+      !upload ||
+      !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(
+        upload.mimetype,
+      )
+    ) {
       return {
         available: true,
         status: 'error',

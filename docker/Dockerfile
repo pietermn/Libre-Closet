@@ -12,7 +12,7 @@ WORKDIR /app
 # the destination must be a directory and end with a /
 COPY package*.json ./
 COPY patches ./patches
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY src ./src
 COPY views ./views
@@ -31,17 +31,21 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY patches ./patches
-RUN npm ci
+RUN npm ci --include=dev && npm prune --omit=dev && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/views ./views
 COPY --from=builder /app/public ./public
 
-COPY .env .
-
 # Set NODE_ENV to production
 ENV NODE_ENV=production
+
+# Runtime files are read-only; do not recursively chown node_modules. Besides
+# making builds slow, that duplicates a large image layer. The writable data
+# directory is the mounted volume and is owned by this UID on deployment.
+RUN groupadd --gid 999 --system app && useradd --uid 999 --system --gid app --home-dir /app app
+USER app
 
 EXPOSE 3000
 

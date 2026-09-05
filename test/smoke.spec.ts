@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const APP_NAME = process.env.APP_NAME || 'Boilerplate';
+const APP_NAME = process.env.APP_NAME || 'Franklinplein';
 
 test('homepage loads with APP_NAME title and version', async ({ page }) => {
   const consoleErrors: string[] = [];

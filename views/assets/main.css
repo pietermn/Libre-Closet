@@ -11,12 +11,20 @@ and response bandwidth/latency. */
     }
 }
 
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
+.drawer.navbar {
+  /* Keep the app chrome fully in document flow. A sticky stacking context
+     can make iOS/Safari soften content around the top edge while scrolling. */
+  position: relative;
+}
+
+/* iOS PWAs can retain backdrop-filter compositing layers after a navigation.
+   Keep all top chrome explicitly opaque and unfiltered. */
+.closet-topbar {
+  background-color: var(--color-base-100) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 /* ── Calendar: outfit chip colors (outfit.id % 6) ─────────────────────── */
