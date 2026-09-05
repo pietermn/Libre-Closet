@@ -1,5 +1,8 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "@fastify/view"]
+  },
   "exclude": [
     "node_modules",
     "test",
@@ -9,6 +12,6 @@
     "public",
     "**/mikro-orm.*.cli-config.*",
     "views",
-    "**/playwright.config.ts",
+    "**/playwright.config.ts"
   ]
 }

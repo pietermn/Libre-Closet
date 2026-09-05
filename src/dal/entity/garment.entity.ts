@@ -28,8 +28,8 @@ export class Garment extends ShareableId {
   @Property()
   public category!: string;
 
-  @Enum({ nullable: true })
-  public color?: GarmentColor;
+  @Enum({ items: () => GarmentColor, nullable: true })
+  public color?: string;
 
   @Property({ nullable: true })
   public brand?: string;
@@ -52,7 +52,7 @@ export class Garment extends ShareableId {
     entity: () => File,
     nullable: true,
   })
-  public photo?: Ref<File>;
+  public photo?: File;
 
   @ManyToOne({
     entity: () => User,

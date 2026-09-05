@@ -59,7 +59,6 @@
         <p id="newGarmentPreviewCaption" class="px-3 py-2 text-sm text-base-content/60">Photo ready to save</p>
       </div>
       <p class="text-sm text-base-content/60 mt-2">{{t 'lang.PHOTO_SAVE_WITH_GARMENT'}}</p>
-      <p id="analysisStatus" class="hidden mt-3 text-sm text-base-content/60" aria-live="polite"></p>
       <p id="photoEditStatus" class="hidden mt-3 text-sm text-primary" role="status" aria-live="polite"></p>
       <div class="mt-3 grid w-full grid-cols-2 gap-2 hidden" id="photoEditingActions">
         <button id="editNewPhoto" type="button" class="btn btn-outline btn-sm w-full text-xs">
@@ -73,6 +72,13 @@
       </div>
     </div>
     {{/unless}}
+    {{/unless}}
+
+    {{#unless garment}}
+    <div id="analysisFeedback" class="hidden">
+      <p id="analysisStatus" class="text-sm text-base-content/60" role="status" aria-live="polite"></p>
+      <button id="retryAnalysis" type="button" class="btn btn-sm mt-2 hidden">Try finding details again</button>
+    </div>
     {{/unless}}
 
     <section id="detailsPanel" {{#unless garment}}data-wizard-detail{{/unless}} class="card card-border bg-base-100 shadow-sm">
@@ -196,6 +202,11 @@
   const framePhoto = document.getElementById('frameNewPhoto');
   const photoEditingActions = document.getElementById('photoEditingActions');
   const editStatus = document.getElementById('photoEditStatus');
+  const feedback = document.getElementById('analysisFeedback');
+  const retryAnalysis = document.getElementById('retryAnalysis');
+  let originalPhoto;
+  let analyzing = false;
+  const previousSuggestions = {};
   let editedPhoto;
   let previewUrl;
 
@@ -228,38 +239,75 @@
   photoStep.addEventListener('click', showPhoto);
   detailsStep.addEventListener('click', showDetails);
 
-  continueButton.addEventListener('click', async () => {
-    const photo = editedPhoto || form.elements.photo.files?.[0];
+  const analyzePhoto = async () => {
+    if (analyzing) return;
+    // Background cleanup and framing can erase small brand marks and labels.
+    const photo = originalPhoto || photoInput.files?.[0];
     if (!photo) return showDetails();
+    analyzing = true;
     status.textContent = 'Finding garment details…';
-    status.classList.remove('hidden');
-    continueButton.disabled = true;
+    feedback.classList.remove('hidden');
+    retryAnalysis.classList.add('hidden');
+    const controls = [continueButton, retryAnalysis, photoInput, editPhoto, framePhoto];
+    const disabledStates = controls.map((control) => control.disabled);
+    controls.forEach((control) => { control.disabled = true; });
+    const fields = ['name', 'category', 'brand', 'size', 'washingDetails'];
+    const before = Object.fromEntries(fields.map((field) => [field, form.elements[field].value]));
+    const colorInputs = [...form.querySelectorAll('input[name="color"]')];
+    const selectedColors = () => colorInputs.filter((input) => input.checked).map((input) => input.value).sort().join(',');
+    const colorsBefore = selectedColors();
     try {
       const data = new FormData();
       data.append('photo', photo);
-      const response = await fetch('/ai/garment-analysis', { method: 'POST', body: data });
+      const response = await fetch('/ai/garment-analysis', {
+        method: 'POST', body: data, signal: AbortSignal.timeout(60_000),
+      });
+      if (!response.ok) throw new Error('Analysis request failed');
       const suggestion = await response.json();
-      if (suggestion.available) {
-        if (suggestion.name) form.elements.name.value = suggestion.name;
-        if (suggestion.category) form.elements.category.value = suggestion.category;
-        if (suggestion.brand) form.elements.brand.value = suggestion.brand;
-        if (suggestion.size) form.elements.size.value = suggestion.size;
-        if (suggestion.washingDetails) form.elements.washingDetails.value = suggestion.washingDetails;
-        suggestion.colors?.forEach((color) => {
-          const colorInput = form.querySelector(`input[name="color"][value="${CSS.escape(color)}"]`);
-          if (colorInput) { colorInput.checked = true; colorInput.dispatchEvent(new Event('change', { bubbles: true })); }
-        });
+      if (!suggestion.available) {
+        status.textContent = 'Automatic details are not configured. You can enter the details yourself.';
+        return;
       }
+      if (suggestion.status !== 'success') {
+        status.textContent = suggestion.message || 'No garment details found. Try again or enter details yourself.';
+        retryAnalysis.classList.remove('hidden');
+        return;
+      }
+      for (const field of fields) {
+        const input = form.elements[field];
+        if (input.value === before[field] && (!input.value || input.value === previousSuggestions[field])) {
+          input.value = suggestion[field] || '';
+          previousSuggestions[field] = input.value;
+        }
+      }
+      if (selectedColors() === colorsBefore && (!colorsBefore || colorsBefore === previousSuggestions.colors)) {
+        colorInputs.forEach((input) => {
+          input.checked = suggestion.colors?.includes(input.value) || false;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        previousSuggestions.colors = selectedColors();
+      }
+      status.textContent = suggestion.brand
+        ? 'Suggestions ready. Review the details before saving.'
+        : 'Suggestions ready. Brand could not be identified; a clear label or logo photo can help.';
+      retryAnalysis.classList.remove('hidden');
     } catch (_) {
-      // AI suggestions are optional; continue with a fully editable form.
+      status.textContent = 'Could not find garment details right now. Try again or enter details yourself.';
+      retryAnalysis.classList.remove('hidden');
     } finally {
+      analyzing = false;
+      controls.forEach((control, index) => { control.disabled = disabledStates[index]; });
       showDetails();
     }
-  });
+  };
+  continueButton.addEventListener('click', analyzePhoto);
+  retryAnalysis.addEventListener('click', analyzePhoto);
 
   photoInput.addEventListener('change', () => {
     editedPhoto = undefined;
     const file = photoInput.files?.[0];
+    originalPhoto = file;
+    feedback.classList.add('hidden');
     photoEditingActions.classList.toggle('hidden', !file);
     if (file) previewPhoto(file, 'Original photo selected');
     else photoPreview.classList.add('hidden');

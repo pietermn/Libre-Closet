@@ -17,6 +17,7 @@
     "generate:tailwind:watch": "npx @tailwindcss/cli -i ./views/assets/main.css -o ./public/bundle.css --minify --watch",
     "watch:views": "node scripts/watch-views.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.build.json",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "npm run generate && nest start",
     "start:dev": "concurrently \"nest start --watch\" \"npm run generate:tailwind:watch\" \"npm run watch:views\"",

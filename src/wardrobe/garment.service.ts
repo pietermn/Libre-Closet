@@ -186,8 +186,9 @@ export class GarmentService {
     const garment = this.garmentRepository.create({
       name: dto.name,
       category: dto.category,
+      archived: false,
       brand: dto.brand,
-      color: dto.color as any,
+      color: dto.color,
       size: this.normalizeSize(dto.size),
       notes: dto.notes,
       washingDetails: dto.washingDetails,
@@ -242,8 +243,9 @@ export class GarmentService {
     const garment = this.garmentRepository.create({
       name: dto.name,
       category: dto.category,
+      archived: false,
       brand: dto.brand,
-      color: dto.color as any,
+      color: dto.color,
       size: this.normalizeSize(dto.size),
       notes: dto.notes,
       photo: photo ?? undefined,
@@ -338,7 +340,7 @@ export class GarmentService {
 
     if (photo) {
       await this.deleteOldPhoto(garment);
-      garment.photo = photo as any;
+      garment.photo = photo;
     }
 
     garment.name = dto.name ?? garment.name;

@@ -19,9 +19,6 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "types": [
-      "node",
-      "@fastify/view"
-    ]
+    "types": ["node", "jest", "@fastify/view"]
   }
 }
