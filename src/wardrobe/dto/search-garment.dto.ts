@@ -1,9 +1,7 @@
-import { GarmentColor } from '../garment-color.enum';
-
 export interface SearchGarmentDto {
   keyword?: string;
   category?: string;
-  color?: GarmentColor;
+  color?: string;
   brand?: string;
   size?: string;
   archived?: string;

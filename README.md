@@ -81,6 +81,7 @@ Note, these screenshots are taken of the web application viewed as an installed 
 
 ## Features
 
+- **Agent access via MCP** - search garments, import photos from URLs, and retrieve images for display. See the [MCP guide](docs/mcp.md).
 - **Garment catalog** - name, category, brand, size, colors, notes, photo
 - **Customizable categories** - custom category support with filtering and input suggestion as you type
 - **Outfit builder** - combine garments into saved looks with the Clueless inspired outfit builder

@@ -1,4 +1,4 @@
-import { EntityRepository, FilterQuery } from '@mikro-orm/core';
+import { EntityRepository, FilterQuery, raw } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { randomUUID } from 'node:crypto';
 import {
@@ -92,6 +92,63 @@ export class GarmentService {
       { owner: null, ...searchConditions },
       { populate: ['photo'], orderBy: { id: 'DESC' } },
     );
+  }
+
+  /** Paginated MCP search, always restricted to the linked account. */
+  async findPage(
+    userId: number,
+    dto: SearchGarmentDto,
+    limit: number,
+    offset: number,
+  ) {
+    const conditions: FilterQuery<Garment> = {
+      owner: { id: userId },
+      ...(dto.archived !== 'true' ? { archived: false } : {}),
+    };
+    for (const field of ['category', 'brand'] as const) {
+      const value = dto[field]?.trim();
+      if (value)
+        conditions[raw((alias) => `lower(${alias}.${field})`)] =
+          value.toLowerCase();
+    }
+    if (dto.size) conditions.size = this.normalizeSize(dto.size);
+    const and: FilterQuery<Garment>[] = [];
+    if (dto.keyword?.trim()) {
+      and.push({
+        $or: ['name', 'brand', 'notes', 'category'].map((field) => ({
+          [raw((alias) => `lower(${alias}.${field})`)]: {
+            $like: `%${dto.keyword!.trim().toLowerCase()}%`,
+          },
+        })),
+      });
+    }
+    if (dto.color?.trim()) {
+      const color = dto.color.trim().toLowerCase();
+      // Stored colors are comma-separated, sometimes with spaces after commas.
+      and.push({
+        $or: [
+          color,
+          `${color},%`,
+          `%,${color}`,
+          `%,${color},%`,
+          `%, ${color}`,
+          `%, ${color},%`,
+        ].map((pattern) => ({
+          [raw((alias) => `lower(${alias}.color)`)]: { $like: pattern },
+        })),
+      });
+    }
+    if (and.length) conditions.$and = and;
+    const [garments, total] = await this.garmentRepository.findAndCount(
+      conditions,
+      {
+        populate: ['photo'],
+        orderBy: { id: 'DESC' },
+        limit,
+        offset,
+      },
+    );
+    return { garments, total };
   }
 
   async findOne(
@@ -338,10 +395,8 @@ export class GarmentService {
 
     const garment = await this.findOne(id, requestingUserId, userId);
 
-    if (photo) {
-      await this.deleteOldPhoto(garment);
-      garment.photo = photo;
-    }
+    const previousPhoto = garment.photo;
+    if (photo) garment.photo = photo;
 
     garment.name = dto.name ?? garment.name;
     garment.category = dto.category ?? garment.category;
@@ -356,11 +411,12 @@ export class GarmentService {
         : undefined;
 
     await this.garmentRepository.getEntityManager().flush();
+    if (photo && previousPhoto)
+      await this.deleteOldPhoto(previousPhoto.fileName);
     return garment;
   }
 
-  private async deleteOldPhoto(garment: Garment) {
-    const oldFileName = garment.photo?.fileName;
+  private async deleteOldPhoto(oldFileName: string) {
     if (oldFileName) {
       await this.fileService
         .delete(oldFileName)
