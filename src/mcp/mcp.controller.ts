@@ -111,6 +111,7 @@ export class McpOAuthController {
   async approve(
     @Body() body: Record<string, string | undefined>,
     @User() user: Payload,
+    @Req() req: FastifyRequest,
     @Res() reply: FastifyReply,
   ) {
     if (body.approve !== 'true')
@@ -135,6 +136,8 @@ export class McpOAuthController {
     const url = new URL(body.redirect_uri!);
     url.searchParams.set('code', code);
     if (body.state) url.searchParams.set('state', body.state);
+    if (req.headers['hx-request'] === 'true')
+      return reply.header('HX-Redirect', url.toString()).code(204).send();
     return reply.redirect(url.toString(), 302);
   }
 
